@@ -21,445 +21,244 @@ export interface OrderbookTestDescriberConfig {
     readonly hidePrice?: boolean;
     readonly hideOrderId?: boolean;
     readonly hideAmount?: boolean;
-    readonly hideAccount?: boolean;
 }
 
 export const describer = new ConfigurableDescriber<OrderbookTestDescriberConfig>();
 
-describer.addDescriber(PlaceOrderAction, function({
-    orderType, price, amount, account
-}, {
-    hidePrice, hideOrderType, hideAmount, hideAccount
-} = {}) {
-    const description = ['place'];
-    if (!hideOrderType) {
-        description.push(describeOrderType(orderType));
+function describeSetup(description: string[], scenario: { setupActions: readonly { description: string }[] }) {
+    const { setupActions } = scenario;
+    for (const [ index, action ] of setupActions.entries()) {
+        description.push(index == 0 ? 'after' : 'and');
+        description.push(action.description);
     }
-    if (!hideOrderType && !hidePrice) {
-        description.push('at');
-    }
-    if (!hidePrice) {
-        description.push(formatValue(price));
-    }
-    description.push('order');
-    if (!hideAmount) {
-        description.push('of');
-        description.push(String(amount));
-        description.push(`contract${ amount != 1n ? 's' : '' }`);
-    }
-    if (!hideAccount && account != Account.MAIN) {
-        description.push(`using ${account}`)
-    }
-    return description.join(' ');
-});
+}
 
-describer.addDescriber(FillAction, function({
-    orderType, maxAmount, maxPrice, maxPricePoints
-}, {
-    hidePrice, hideOrderType, hideAmount
-} = {}) {
-    if (orderType == OrderType.SELL && maxPrice == MAX_UINT256) {
-        hidePrice = true;
-    } else if (orderType == OrderType.BUY && maxPrice == 0n) {
-        hidePrice = true;
+function describeCaller(description: string[], scenario: { caller: Account }) {
+    const { caller } = scenario;
+    if (caller != Account.MAIN) {
+        description.push('using');
+        description.push(caller);
     }
-    const description = ['fill'];
-    if (!hideAmount) {
-        description.push(String(maxAmount));
-        description.push('or less contracts');
-        if (!hideOrderType || !hidePrice) {
-            description.push('of');
+}
+
+function describeMaxAmountOfContracts(description: string[], scenario: { maxAmount: bigint }, config: { hideAmount?: boolean }, preposition?: string) {
+    const { maxAmount } = scenario;
+    const { hideAmount } = config;
+    if (!hideAmount && maxAmount < MAX_UINT32) {
+        if (preposition) {
+            description.push(preposition);
         }
+        description.push(`${maxAmount} or less contracts`);
     }
-    if (!hideOrderType) {
-        description.push(describeOrderType(orderType));
+}
+
+function describeAmountOfContracts(description: string[], scenario: { amount: bigint }, config: { hideAmount?: boolean }, preposition?: string) {
+    const { amount } = scenario;
+    const { hideAmount } = config;
+    if (!hideAmount) {
+        if (preposition) {
+            description.push(preposition);
+        }
+        description.push(`${amount} contract${ amount != 1n ? 's' : '' }`);
     }
-    if (!hideOrderType && !hidePrice) {
+}
+
+function describeMaxPrice(description: string[], scenario: { maxPrice: bigint }, config: { hidePrice?: boolean }) {
+    const { maxPrice } = scenario;
+    const { hidePrice } = config;
+    if (!hidePrice && maxPrice < MAX_UINT256) {
         description.push('at');
-    }
-    if (!hidePrice) {
         description.push(formatValue(maxPrice));
         description.push('or better');
     }
-    if (hideAmount || !hideOrderType || !hidePrice) {
-        description.push('orders');
+}
+
+function describeMinPrice(description: string[], scenario: { minPrice: bigint }, config: { hidePrice?: boolean }) {
+    const { minPrice } = scenario;
+    const { hidePrice } = config;
+    if (!hidePrice && minPrice > 0n) {
+        description.push('at');
+        description.push(formatValue(minPrice));
+        description.push('or better');
     }
+}
+
+function describePriceLimit(description: string[], scenario: { price: bigint }, config: { hidePrice?: boolean }) {
+    const { price } = scenario;
+    const { hidePrice } = config;
+    if (!hidePrice) {
+        description.push('at');
+        description.push(formatValue(price));
+        description.push('or better');
+    }
+}
+
+function describeMaxPricePoints(description: string[], scenario: { maxPricePoints: number }) {
+    const { maxPricePoints } = scenario;
     if (maxPricePoints != MAX_UINT8) {
-        description.push('for at most');
-        description.push(String(maxPricePoints));
-        description.push(`price point${maxPricePoints!=1?'s':''}`);
+        description.push(`for at most ${maxPricePoints} price point${maxPricePoints!=1?'s':''}`);
     }
+}
+
+function describeOrder(description: string[], scenario: { orderType: OrderType, price: bigint, orderId?: bigint }, config: { hideOrderType?: boolean, hidePrice?: boolean, hideOrderId?: boolean }) {
+    const { orderType, price, orderId } = scenario;
+    const { hideOrderType, hidePrice, hideOrderId } = config;
+    if (!hideOrderType) {
+        description.push(describeOrderType(orderType));
+    }
+    if (!hideOrderType && !hidePrice) {
+        description.push('at');
+    }
+    if (!hidePrice) {
+        description.push(formatValue(price));
+    }
+    description.push('order');
+    if (!hideOrderId && orderId) {
+        description.push(`#${orderId}`);
+    }
+}
+
+function describeFillPricePoint(description: string[], scenario: { orderType: OrderType, maxPrice: bigint }, config: { hideOrderType?: boolean, hidePrice?: boolean }) {
+    const { orderType, maxPrice } = scenario;
+    const { hideOrderType, hidePrice } = config;
+    if (!hideOrderType) {
+        description.push(describeOrderType(orderType));
+    }
+    if (!hideOrderType && !hidePrice) {
+        description.push('at');
+    }
+    if (!hidePrice
+     && !(orderType == OrderType.SELL && maxPrice == MAX_UINT256)
+     && !(orderType == OrderType.BUY && maxPrice == 0n)) {
+        description.push(formatValue(maxPrice));
+        description.push('or better');
+    }
+}
+
+function describeScenario(description: string[], scenario: { contractSize: bigint, priceTick: bigint }, config: { hideContractSize?: boolean, hidePriceTick?: boolean }) {
+    const { contractSize, priceTick } = scenario;
+    const { hideContractSize, hidePriceTick } = config;
+    if (!hideContractSize || !hidePriceTick) {
+        description.push('with');
+    }
+    if (!hideContractSize) {
+        description.push(`contract size at ${formatValue(contractSize)}`);
+    }
+    if (!hideContractSize && !hidePriceTick) {
+        description.push('and');
+    }
+    if (!hidePriceTick) {
+        description.push(`price tick at ${formatValue(priceTick)}`);
+    }
+}
+
+describer.addDescriber(PlaceOrderAction, (action, config = {}) => {
+    const description = ['place'];
+    describeOrder(description, action, config);
+    describeAmountOfContracts(description, action, config, 'of');
+    describeCaller(description, action);
     return description.join(' ');
 });
 
-describer.addDescriber(ClaimOrderAction, function({
-    orderType, price, orderId, maxAmount
-}, {
-    hidePrice, hideOrderType, hideOrderId, hideAmount
-} = {}) {
-    if (maxAmount == MAX_UINT32) {
-        hideAmount = true;
-    }
+describer.addDescriber(FillAction, (action, config = {}) => {
+    const description = ['fill'];
+    describeMaxAmountOfContracts(description, action, config);
+    describeFillPricePoint(description, action, config);
+    description.push('orders');
+    describeMaxPricePoints(description, action);
+    return description.join(' ');
+});
+
+describer.addDescriber(ClaimOrderAction, (action, config = {}) => {
     const description = ['claim'];
-    if (!hideAmount) {
-        description.push(String(maxAmount));
-        description.push('or less contracts');
-        if (!hideOrderType || !hidePrice || !hideOrderId) {
-            description.push('of');
-        }
-    }
-    if (!hideOrderType) {
-        description.push(describeOrderType(orderType));
-    }
-    if (!hideOrderType && !hidePrice) {
-        description.push('at');
-    }
-    if (!hidePrice) {
-        description.push(formatValue(price));
-    }
-    if (!hideOrderId) {
-        description.push(`order #${orderId}`);
-    } else if (hideAmount || !hideOrderType || !hidePrice) {
-        description.push('order');
-    }
+    describeMaxAmountOfContracts(description, action, config);
+    describeOrder(description, action, config);
     return description.join(' ');
 });
 
-describer.addDescriber(CancelOrderAction, function({
-    orderType, price, orderId
-}, {
-    hidePrice, hideOrderType, hideOrderId
-} = {}) {
+describer.addDescriber(CancelOrderAction, (action, config = {}) => {
     const description = ['cancel'];
-    if (!hideOrderType) {
-        description.push(describeOrderType(orderType));
-    }
-    if (!hideOrderType && !hidePrice) {
-        description.push('at');
-    }
-    if (!hidePrice) {
-        description.push(formatValue(price));
-    }
-    description.push('order');
-    if (!hideOrderId) {
-        description.push(`#${orderId}`);
-    }
+    describeOrder(description, action, config);
     return description.join(' ');
 });
 
-describer.addDescriber(TransferOrderToOperatorAction, function({
-    orderType, price, orderId
-}, {
-    hidePrice, hideOrderType, hideOrderId
-} = {}) {
+describer.addDescriber(TransferOrderToOperatorAction, (action, config = {}) => {
     const description = ['transfer'];
-    if (!hideOrderType) {
-        description.push(describeOrderType(orderType));
-    }
-    if (!hideOrderType && !hidePrice) {
-        description.push('at');
-    }
-    if (!hidePrice) {
-        description.push(formatValue(price));
-    }
-    description.push('order');
-    if (!hideOrderId) {
-        description.push(`#${orderId}`);
-    }
+    describeOrder(description, action, config);
     description.push('to operator');
     return description.join(' ');
 });
 
-describer.addDescriber(OperatorBuyAtMarketScenario, function({
-    maxAmount, maxPrice, maxPricePoints, setupActions, contractSize, priceTick
-}, {
-    hidePrice, hideAmount, hideContractSize, hidePriceTick
-} = {}) {
-    if (maxPrice == MAX_UINT256) {
-        hidePrice = true;
-    }
+describer.addDescriber(OperatorBuyAtMarketScenario, (scenario, config = {}) => {
     const description = ['buy at market'];
-    if (!hideAmount) {
-        description.push(String(maxAmount));
-        description.push('or less contracts');
-        if (!hidePrice) {
-            description.push('of');
-        }
-    }
-    if (!hidePrice) {
-        description.push(formatValue(maxPrice));
-        description.push('or better');
-    }
-    if (maxPricePoints != MAX_UINT8) {
-        description.push('for at most');
-        description.push(String(maxPricePoints));
-        description.push(`price point${maxPricePoints!=1?'s':''}`);
-    }
-    for (const [ index, action ] of setupActions.entries()) {
-        description.push(index == 0 ? 'after' : 'and');
-        description.push(action.description);
-    }
-    if (!hideContractSize || !hidePriceTick) {
-        description.push('with');
-    }
-    if (!hideContractSize) {
-        description.push(`contract size at ${formatValue(contractSize)}`);
-    }
-    if (!hideContractSize && !hidePriceTick) {
-        description.push('and');
-    }
-    if (!hidePriceTick) {
-        description.push(`price tick at ${formatValue(priceTick)}`);
-    }
+    describeMaxAmountOfContracts(description, scenario, config);
+    describeMaxPrice(description, scenario, config);
+    describeMaxPricePoints(description, scenario);
+    describeCaller(description, scenario);
+    describeSetup(description, scenario);
+    describeScenario(description, scenario, config);
     return description.join(' ');
 });
 
-describer.addDescriber(OperatorSellAtMarketScenario, function({
-    maxAmount, minPrice, maxPricePoints, setupActions, contractSize, priceTick
-}, {
-    hidePrice, hideAmount, hideContractSize, hidePriceTick
-} = {}) {
-    if (minPrice == 0n) {
-        hidePrice = true;
-    }
+describer.addDescriber(OperatorSellAtMarketScenario, (scenario, config = {}) => {
     const description = ['sell at market'];
-    if (!hideAmount) {
-        description.push(String(maxAmount));
-        description.push('or less contracts');
-        if (!hidePrice) {
-            description.push('of');
-        }
-    }
-    if (!hidePrice) {
-        description.push(formatValue(minPrice));
-        description.push('or better');
-    }
-    if (maxPricePoints != MAX_UINT8) {
-        description.push('for at most');
-        description.push(String(maxPricePoints));
-        description.push(`price point${maxPricePoints!=1?'s':''}`);
-    }
-    for (const [ index, action ] of setupActions.entries()) {
-        description.push(index == 0 ? 'after' : 'and');
-        description.push(action.description);
-    }
-    if (!hideContractSize || !hidePriceTick) {
-        description.push('with');
-    }
-    if (!hideContractSize) {
-        description.push(`contract size at ${formatValue(contractSize)}`);
-    }
-    if (!hideContractSize && !hidePriceTick) {
-        description.push('and');
-    }
-    if (!hidePriceTick) {
-        description.push(`price tick at ${formatValue(priceTick)}`);
-    }
+    describeMaxAmountOfContracts(description, scenario, config);
+    describeMinPrice(description, scenario, config);
+    describeMaxPricePoints(description, scenario);
+    describeCaller(description, scenario);
+    describeSetup(description, scenario);
+    describeScenario(description, scenario, config);
     return description.join(' ');
 });
 
-describer.addDescriber(OperatorPlaceBuyOrderScenario, function({
-    maxAmount, price, maxPricePoints, setupActions, contractSize, priceTick
-}, {
-    hidePrice, hideAmount, hideContractSize, hidePriceTick
-} = {}) {
+describer.addDescriber(OperatorPlaceBuyOrderScenario, (scenario, config = {}) => {
     const description = ['place buy order'];
-    if (!hideAmount) {
-        description.push('of');
-        description.push(String(maxAmount));
-        description.push('or less contracts');
-    }
-    if (!hidePrice) {
-        description.push('of');
-        description.push(formatValue(price));
-        description.push('or better');
-    }
-    if (maxPricePoints != MAX_UINT8) {
-        description.push('for at most');
-        description.push(String(maxPricePoints));
-        description.push(`price point${maxPricePoints!=1?'s':''}`);
-    }
-    for (const [ index, action ] of setupActions.entries()) {
-        description.push(index == 0 ? 'after' : 'and');
-        description.push(action.description);
-    }
-    if (!hideContractSize || !hidePriceTick) {
-        description.push('with');
-    }
-    if (!hideContractSize) {
-        description.push(`contract size at ${formatValue(contractSize)}`);
-    }
-    if (!hideContractSize && !hidePriceTick) {
-        description.push('and');
-    }
-    if (!hidePriceTick) {
-        description.push(`price tick at ${formatValue(priceTick)}`);
-    }
+    describeMaxAmountOfContracts(description, scenario, config, 'of');
+    describePriceLimit(description, scenario, config);
+    describeMaxPricePoints(description, scenario);
+    describeCaller(description, scenario);
+    describeSetup(description, scenario);
+    describeScenario(description, scenario, config);
     return description.join(' ');
 });
 
-describer.addDescriber(OperatorPlaceSellOrderScenario, function({
-    maxAmount, price, maxPricePoints, setupActions, contractSize, priceTick
-}, {
-    hidePrice, hideAmount, hideContractSize, hidePriceTick
-} = {}) {
+describer.addDescriber(OperatorPlaceSellOrderScenario, (scenario, config = {}) => {
     const description = ['place sell order'];
-    if (!hideAmount) {
-        description.push('of');
-        description.push(String(maxAmount));
-        description.push('or less contracts');
-    }
-    if (!hidePrice) {
-        description.push('of');
-        description.push(formatValue(price));
-        description.push('or better');
-    }
-    if (maxPricePoints != MAX_UINT8) {
-        description.push('for at most');
-        description.push(String(maxPricePoints));
-        description.push(`price point${maxPricePoints!=1?'s':''}`);
-    }
-    for (const [ index, action ] of setupActions.entries()) {
-        description.push(index == 0 ? 'after' : 'and');
-        description.push(action.description);
-    }
-    if (!hideContractSize || !hidePriceTick) {
-        description.push('with');
-    }
-    if (!hideContractSize) {
-        description.push(`contract size at ${formatValue(contractSize)}`);
-    }
-    if (!hideContractSize && !hidePriceTick) {
-        description.push('and');
-    }
-    if (!hidePriceTick) {
-        description.push(`price tick at ${formatValue(priceTick)}`);
-    }
+    describeMaxAmountOfContracts(description, scenario, config, 'of');
+    describePriceLimit(description, scenario, config);
+    describeMaxPricePoints(description, scenario);
+    describeCaller(description, scenario);
+    describeSetup(description, scenario);
+    describeScenario(description, scenario, config);
     return description.join(' ');
 });
 
-describer.addDescriber(OperatorClaimOrderScenario, function({
-    orderType, price, orderId, maxAmount, setupActions, contractSize, priceTick
-}, {
-    hidePrice, hideOrderType, hideOrderId, hideAmount, hideContractSize, hidePriceTick
-} = {}) {
-    if (maxAmount == MAX_UINT32) {
-        hideAmount = true;
-    }
+describer.addDescriber(OperatorClaimOrderScenario, (scenario, config = {}) => {
     const description = ['claim'];
-    if (!hideAmount) {
-        description.push(String(maxAmount));
-        description.push('or less contracts');
-        if (!hideOrderType || !hidePrice || !hideOrderId) {
-            description.push('of');
-        }
-    }
-    if (!hideOrderType) {
-        description.push(describeOrderType(orderType));
-    }
-    if (!hideOrderType && !hidePrice) {
-        description.push('at');
-    }
-    if (!hidePrice) {
-        description.push(formatValue(price));
-    }
-    if (!hideOrderId) {
-        description.push(`order #${orderId}`);
-    } else if (hideAmount || !hideOrderType || !hidePrice) {
-        description.push('order');
-    }
-    for (const [ index, action ] of setupActions.entries()) {
-        description.push(index == 0 ? 'after' : 'and');
-        description.push(action.description);
-    }
-    if (!hideContractSize || !hidePriceTick) {
-        description.push('with');
-    }
-    if (!hideContractSize) {
-        description.push(`contract size at ${formatValue(contractSize)}`);
-    }
-    if (!hideContractSize && !hidePriceTick) {
-        description.push('and');
-    }
-    if (!hidePriceTick) {
-        description.push(`price tick at ${formatValue(priceTick)}`);
-    }
+    describeMaxAmountOfContracts(description, scenario, config);
+    description.push('from');
+    describeOrder(description, scenario, config);
+    describeCaller(description, scenario);
+    describeSetup(description, scenario);
+    describeScenario(description, scenario, config);
     return description.join(' ');
 });
 
-describer.addDescriber(OperatorTransferOrderScenario, function({
-    orderType, price, orderId, recipient, setupActions, contractSize, priceTick
-}, {
-    hidePrice, hideOrderType, hideOrderId, hideContractSize, hidePriceTick
-} = {}) {
+describer.addDescriber(OperatorTransferOrderScenario, (scenario, config = {}) => {
     const description = ['transfer'];
-    if (!hideOrderType) {
-        description.push(describeOrderType(orderType));
-    }
-    if (!hideOrderType && !hidePrice) {
-        description.push('at');
-    }
-    if (!hidePrice) {
-        description.push(formatValue(price));
-    }
-    description.push('order');
-    if (!hideOrderId) {
-        description.push(`#${orderId}`);
-    }
-    description.push(`to ${recipient}`);
-    for (const [ index, action ] of setupActions.entries()) {
-        description.push(index == 0 ? 'after' : 'and');
-        description.push(action.description);
-    }
-    if (!hideContractSize || !hidePriceTick) {
-        description.push('with');
-    }
-    if (!hideContractSize) {
-        description.push(`contract size at ${formatValue(contractSize)}`);
-    }
-    if (!hideContractSize && !hidePriceTick) {
-        description.push('and');
-    }
-    if (!hidePriceTick) {
-        description.push(`price tick at ${formatValue(priceTick)}`);
-    }
+    describeOrder(description, scenario, config);
+    description.push(`to ${scenario.recipient}`);
+    describeCaller(description, scenario);
+    describeSetup(description, scenario);
+    describeScenario(description, scenario, config);
     return description.join(' ');
 });
 
-describer.addDescriber(OperatorCancelOrderScenario, function({
-    orderType, price, orderId, setupActions, contractSize, priceTick
-}, {
-    hidePrice, hideOrderType, hideOrderId, hideContractSize, hidePriceTick
-} = {}) {
+describer.addDescriber(OperatorCancelOrderScenario, (scenario, config = {}) => {
     const description = ['cancel'];
-    if (!hideOrderType) {
-        description.push(describeOrderType(orderType));
-    }
-    if (!hideOrderType && !hidePrice) {
-        description.push('at');
-    }
-    if (!hidePrice) {
-        description.push(formatValue(price));
-    }
-    description.push('order');
-    if (!hideOrderId) {
-        description.push(`#${orderId}`);
-    }
-    for (const [ index, action ] of setupActions.entries()) {
-        description.push(index == 0 ? 'after' : 'and');
-        description.push(action.description);
-    }
-    if (!hideContractSize || !hidePriceTick) {
-        description.push('with');
-    }
-    if (!hideContractSize) {
-        description.push(`contract size at ${formatValue(contractSize)}`);
-    }
-    if (!hideContractSize && !hidePriceTick) {
-        description.push('and');
-    }
-    if (!hidePriceTick) {
-        description.push(`price tick at ${formatValue(priceTick)}`);
-    }
+    describeOrder(description, scenario, config);
+    describeCaller(description, scenario);
+    describeSetup(description, scenario);
+    describeScenario(description, scenario, config);
     return description.join(' ');
 });

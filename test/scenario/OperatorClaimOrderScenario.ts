@@ -43,12 +43,12 @@ export class OperatorClaimOrderScenario extends OperatorScenario<Transaction, Cl
         super.addContext(addContext);
     }
 
-    async execute({ operator, orderbook }: OperatorContext) {
-        return await operator.claimOrderV1(orderbook, this.orderType, this.price, this.orderId, this.maxAmount);
+    async execute({ caller, operator, orderbook }: OperatorContext) {
+        return await operator.claimOrderV1(orderbook, this.orderType, this.price, this.orderId, this.maxAmount, { from: caller });
     }
 
-    async executeStatic({ operator, orderbook }: OperatorContext) {
-        return await operator.callStatic.claimOrderV1(orderbook, this.orderType, this.price, this.orderId, this.maxAmount);
+    async executeStatic({ caller, operator, orderbook }: OperatorContext) {
+        return await operator.callStatic.claimOrderV1(orderbook, this.orderType, this.price, this.orderId, this.maxAmount, { from: caller });
     }
 
     get ordersAfter(): Orders {

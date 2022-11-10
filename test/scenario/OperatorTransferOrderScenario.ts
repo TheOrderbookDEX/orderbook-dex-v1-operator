@@ -40,12 +40,12 @@ export class OperatorTransferOrderScenario extends OperatorScenario<Transaction,
         super.addContext(addContext);
     }
 
-    async execute({ operator, orderbook, [this.recipient]: recipient }: OperatorContext) {
-        return await operator.transferOrderV1(orderbook, this.orderType, this.price, this.orderId, recipient);
+    async execute({ caller, operator, orderbook, [this.recipient]: recipient }: OperatorContext) {
+        return await operator.transferOrderV1(orderbook, this.orderType, this.price, this.orderId, recipient, { from: caller });
     }
 
-    async executeStatic({ operator, orderbook, [this.recipient]: recipient }: OperatorContext) {
-        return await operator.callStatic.transferOrderV1(orderbook, this.orderType, this.price, this.orderId, recipient);
+    async executeStatic({ caller, operator, orderbook, [this.recipient]: recipient }: OperatorContext) {
+        return await operator.callStatic.transferOrderV1(orderbook, this.orderType, this.price, this.orderId, recipient, { from: caller });
     }
 
     get ordersAfter(): Orders {

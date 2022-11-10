@@ -1,6 +1,7 @@
 import { DefaultError, parseValue } from '@frugal-wizard/abi2ts-lib';
-import { generatorChain, range } from '@frugal-wizard/contract-test-helper';
+import { Account, generatorChain, range } from '@frugal-wizard/contract-test-helper';
 import { InvalidAmount, InvalidPrice } from '@theorderbookdex/orderbook-dex-v1/dist/interfaces/IOrderbookV1';
+import { Unauthorized } from '../../src/OperatorV1';
 import { PlaceOrderAction } from '../action/PlaceOrderAction';
 import { EXHAUSTIVE } from '../config';
 import { describer } from '../describer/describer';
@@ -170,7 +171,13 @@ operatorPlaceBuyOrderScenarios.push([
             priceTick: parseValue(10),
             expectedErrorInResult: new InvalidPrice(),
         };
-        // TODO test called by someone who is not the owner
+        yield {
+            describer: 'place buy order using account that is not the operator owner',
+            caller: Account.SECOND,
+            maxAmount: 1n,
+            price: parseValue(1),
+            expectedError: Unauthorized,
+        };
 
     }).then(function*(properties) {
         yield new OperatorPlaceBuyOrderScenario(properties);

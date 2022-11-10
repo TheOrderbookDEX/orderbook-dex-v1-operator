@@ -39,12 +39,12 @@ export class OperatorPlaceSellOrderScenario extends OperatorScenario<Transaction
         super.addContext(addContext);
     }
 
-    async execute({ operator, orderbook }: OperatorContext) {
-        return await operator.placeSellOrderV1(orderbook, this.maxAmount, this.price, this.maxPricePoints);
+    async execute({ caller, operator, orderbook }: OperatorContext) {
+        return await operator.placeSellOrderV1(orderbook, this.maxAmount, this.price, this.maxPricePoints, { from: caller });
     }
 
-    async executeStatic({ operator, orderbook }: OperatorContext) {
-        return await operator.callStatic.placeSellOrderV1(orderbook, this.maxAmount, this.price, this.maxPricePoints);
+    async executeStatic({ caller, operator, orderbook }: OperatorContext) {
+        return await operator.callStatic.placeSellOrderV1(orderbook, this.maxAmount, this.price, this.maxPricePoints, { from: caller });
     }
 
     get ordersAfter(): Orders {

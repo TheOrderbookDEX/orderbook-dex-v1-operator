@@ -40,12 +40,12 @@ export class OperatorBuyAtMarketScenario extends OperatorScenario<Transaction, B
         super.addContext(addContext);
     }
 
-    async execute({ operator, orderbook }: OperatorContext) {
-        return await operator.buyAtMarketV1(orderbook, this.maxAmount, this.maxPrice, this.maxPricePoints);
+    async execute({ caller, operator, orderbook }: OperatorContext) {
+        return await operator.buyAtMarketV1(orderbook, this.maxAmount, this.maxPrice, this.maxPricePoints, { from: caller });
     }
 
-    async executeStatic({ operator, orderbook }: OperatorContext) {
-        return await operator.callStatic.buyAtMarketV1(orderbook, this.maxAmount, this.maxPrice, this.maxPricePoints);
+    async executeStatic({ caller, operator, orderbook }: OperatorContext) {
+        return await operator.callStatic.buyAtMarketV1(orderbook, this.maxAmount, this.maxPrice, this.maxPricePoints, { from: caller });
     }
 
     get ordersAfter(): Orders {

@@ -5,35 +5,35 @@ import { Account } from '@frugal-wizard/contract-test-helper';
 import { OrderbookContext } from '../scenario/OrderbookScenario';
 
 export interface PlaceOrderActionProperties extends OrderbookActionProperties {
-    readonly account?: Account;
+    readonly caller?: Account;
     readonly orderType: OrderType;
     readonly price: bigint;
     readonly amount: bigint;
 }
 
 export class PlaceOrderAction extends OrderbookAction {
-    readonly account: Account;
+    readonly caller: Account;
     readonly orderType: OrderType;
     readonly price: bigint;
     readonly amount: bigint;
 
     constructor({
-        account = Account.MAIN,
+        caller = Account.MAIN,
         orderType,
         price,
         amount,
         ...rest
     }: PlaceOrderActionProperties) {
         super(rest);
-        this.account = account;
+        this.caller = caller;
         this.orderType = orderType;
         this.price = price;
         this.amount = amount;
     }
 
     async execute(ctx: OrderbookContext) {
-        const { account, orderType, price, amount } = this;
-        const { tradedToken, baseToken, orderbook, [account]: from } = ctx;
+        const { caller, orderType, price, amount } = this;
+        const { tradedToken, baseToken, orderbook, [caller]: from } = ctx;
         switch (orderType) {
             case OrderType.SELL:
                 await tradedToken.approve(orderbook, amount * await orderbook.contractSize(), { from });
@@ -47,7 +47,7 @@ export class PlaceOrderAction extends OrderbookAction {
 
     apply<T>(state: T) {
         if (state instanceof Orders) {
-            return state.add(this.account, this.orderType, this.price, this.amount);
+            return state.add(this.caller, this.orderType, this.price, this.amount);
         } else {
             return state;
         }

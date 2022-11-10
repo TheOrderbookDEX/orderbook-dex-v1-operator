@@ -1,6 +1,7 @@
 import { DefaultError, parseValue } from '@frugal-wizard/abi2ts-lib';
-import { generatorChain, range } from '@frugal-wizard/contract-test-helper';
+import { Account, generatorChain, range } from '@frugal-wizard/contract-test-helper';
 import { InvalidAmount, InvalidArgument } from '@theorderbookdex/orderbook-dex-v1/dist/interfaces/IOrderbookV1';
+import { Unauthorized } from '../../src/OperatorV1';
 import { PlaceOrderAction } from '../action/PlaceOrderAction';
 import { EXHAUSTIVE } from '../config';
 import { describer } from '../describer/describer';
@@ -179,7 +180,15 @@ operatorSellAtMarketScenarios.push([
                 new PlaceOrderAction({ describer, orderType: OrderType.BUY, price: parseValue(1), amount: 1n }),
             ],
         };
-        // TODO test called by someone who is not the owner
+        yield {
+            describer: 'sell at market using account that is not the operator owner',
+            caller: Account.SECOND,
+            maxAmount: 1n,
+            setupActions: [
+                new PlaceOrderAction({ describer, orderType: OrderType.BUY, price: parseValue(1), amount: 1n }),
+            ],
+            expectedError: Unauthorized,
+        };
 
     }).then(function*(properties) {
         yield new OperatorSellAtMarketScenario(properties);

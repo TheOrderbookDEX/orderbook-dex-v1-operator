@@ -42,12 +42,12 @@ export class OperatorCancelOrderScenario extends OperatorScenario<Transaction, C
         super.addContext(addContext);
     }
 
-    async execute({ operator, orderbook }: OperatorContext) {
-        return await operator.cancelOrderV1(orderbook, this.orderType, this.price, this.orderId, this.maxLastOrderId);
+    async execute({ caller, operator, orderbook }: OperatorContext) {
+        return await operator.cancelOrderV1(orderbook, this.orderType, this.price, this.orderId, this.maxLastOrderId, { from: caller });
     }
 
-    async executeStatic({ operator, orderbook }: OperatorContext) {
-        return await operator.callStatic.cancelOrderV1(orderbook, this.orderType, this.price, this.orderId, this.maxLastOrderId);
+    async executeStatic({ caller, operator, orderbook }: OperatorContext) {
+        return await operator.callStatic.cancelOrderV1(orderbook, this.orderType, this.price, this.orderId, this.maxLastOrderId, { from: caller });
     }
 
     get ordersAfter() {

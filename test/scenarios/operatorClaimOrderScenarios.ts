@@ -1,5 +1,5 @@
 import { parseValue } from '@frugal-wizard/abi2ts-lib';
-import { applySetupActions, generatorChain, range, repeat } from '@frugal-wizard/contract-test-helper';
+import { Account, applySetupActions, generatorChain, range, repeat } from '@frugal-wizard/contract-test-helper';
 import { InvalidOrderId, Unauthorized, InvalidAmount, InvalidPrice, OrderDeleted } from '@theorderbookdex/orderbook-dex-v1/dist/interfaces/IOrderbookV1';
 import { CancelOrderAction } from '../action/CancelOrderAction';
 import { ClaimOrderAction } from '../action/ClaimOrderAction';
@@ -287,7 +287,19 @@ for (const orderType of [ OrderType.SELL, OrderType.BUY ]) {
                 priceTick: parseValue(10),
                 expectedErrorInResult: new InvalidPrice(),
             };
-            // TODO test called by someone who is not the owner
+            yield {
+                describer: 'claim order using account that is not the operator owner',
+                caller: Account.SECOND,
+                orderType,
+                price: parseValue(1),
+                orderId: 1n,
+                setupActions: [
+                    new PlaceOrderAction({ describer, orderType, price: parseValue(1), amount: 1n }),
+                    new FillAction({ describer, orderType, maxAmount: 1n }),
+                    new TransferOrderToOperatorAction({ describer, orderType, price: parseValue(1), orderId: 1n }),
+                ],
+                expectedError: Unauthorized,
+            };
 
         }).then(function*(properties) {
             yield new OperatorClaimOrderScenario(properties);

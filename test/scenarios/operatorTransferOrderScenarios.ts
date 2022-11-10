@@ -102,7 +102,19 @@ for (const orderType of [ OrderType.SELL, OrderType.BUY ]) {
                 priceTick: parseValue(10),
                 expectedErrorInResult: new InvalidPrice(),
             };
-            // TODO test called by someone who is not the owner
+            yield {
+                describer: 'transfer order using account that is not the operator owner',
+                caller: Account.SECOND,
+                orderType,
+                price: parseValue(1),
+                orderId: 1n,
+                recipient: Account.SECOND,
+                setupActions: [
+                    new PlaceOrderAction({ describer, orderType, price: parseValue(1), amount: 1n }),
+                    new TransferOrderToOperatorAction({ describer, orderType, price: parseValue(1), orderId: 1n }),
+                ],
+                expectedError: Unauthorized,
+            };
 
         }).then(function*(properties) {
             yield new OperatorTransferOrderScenario(properties);
