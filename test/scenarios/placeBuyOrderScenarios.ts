@@ -2,15 +2,14 @@ import { DefaultError, parseValue } from '@frugal-wizard/abi2ts-lib';
 import { Account, generatorChain, range } from '@frugal-wizard/contract-test-helper';
 import { InvalidAmount, InvalidPrice } from '@theorderbookdex/orderbook-dex-v1/dist/interfaces/IOrderbookV1';
 import { Unauthorized } from '../../src/OperatorV1';
-import { PlaceOrderAction } from '../action/PlaceOrderAction';
+import { PlaceSellOrderAction } from '../action/PlaceSellOrderAction';
 import { EXHAUSTIVE } from '../config';
 import { describer } from '../describer/describer';
-import { OperatorPlaceBuyOrderScenario } from '../scenario/OperatorPlaceBuyOrderScenario';
-import { OrderType } from '../state/OrderType';
+import { PlaceBuyOrderScenario } from '../scenario/PlaceBuyOrderScenario';
 
-export const operatorPlaceBuyOrderScenarios: [string, Iterable<OperatorPlaceBuyOrderScenario>][] = [];
+export const placeBuyOrderScenarios: [string, Iterable<PlaceBuyOrderScenario>][] = [];
 
-operatorPlaceBuyOrderScenarios.push([
+placeBuyOrderScenarios.push([
     'place buy order',
     generatorChain(function*() {
         yield {
@@ -34,12 +33,12 @@ operatorPlaceBuyOrderScenarios.push([
         yield properties;
 
         const { describer, setupActions } = properties;
-        for (const amount of range(1n, EXHAUSTIVE ? 2n : 1n)) {
+        for (const maxAmount of range(1n, EXHAUSTIVE ? 2n : 1n)) {
             yield {
                 ...properties,
                 setupActions: [
                     ...setupActions,
-                    new PlaceOrderAction({ describer, orderType: OrderType.SELL, price: parseValue(1), amount })
+                    new PlaceSellOrderAction({ describer, price: parseValue(1), maxAmount })
                 ],
             };
         }
@@ -48,12 +47,12 @@ operatorPlaceBuyOrderScenarios.push([
         yield properties;
 
         const { describer, setupActions } = properties;
-        for (const amount of range(1n, EXHAUSTIVE ? 2n : 1n)) {
+        for (const maxAmount of range(1n, EXHAUSTIVE ? 2n : 1n)) {
             yield {
                 ...properties,
                 setupActions: [
                     ...setupActions,
-                    new PlaceOrderAction({ describer, orderType: OrderType.SELL, price: parseValue(2), amount })
+                    new PlaceSellOrderAction({ describer, price: parseValue(2), maxAmount })
                 ],
             };
         }
@@ -62,12 +61,12 @@ operatorPlaceBuyOrderScenarios.push([
         yield properties;
 
         const { describer, setupActions } = properties;
-        for (const amount of range(1n, EXHAUSTIVE ? 2n : 1n)) {
+        for (const maxAmount of range(1n, EXHAUSTIVE ? 2n : 1n)) {
             yield {
                 ...properties,
                 setupActions: [
                     ...setupActions,
-                    new PlaceOrderAction({ describer, orderType: OrderType.SELL, price: parseValue(3), amount })
+                    new PlaceSellOrderAction({ describer, price: parseValue(3), maxAmount })
                 ],
             };
         }
@@ -81,11 +80,11 @@ operatorPlaceBuyOrderScenarios.push([
         }
 
     }).then(function*(properties) {
-        yield new OperatorPlaceBuyOrderScenario(properties);
+        yield new PlaceBuyOrderScenario(properties);
     })
 ]);
 
-operatorPlaceBuyOrderScenarios.push([
+placeBuyOrderScenarios.push([
     'place buy order using maxPricePoints',
     generatorChain(function*() {
         yield {
@@ -104,9 +103,9 @@ operatorPlaceBuyOrderScenarios.push([
             maxAmount: 4n,
             price: parseValue(3),
             setupActions: [
-                new PlaceOrderAction({ describer, orderType: OrderType.SELL, price: parseValue(1), amount: 1n }),
-                new PlaceOrderAction({ describer, orderType: OrderType.SELL, price: parseValue(2), amount: 1n }),
-                new PlaceOrderAction({ describer, orderType: OrderType.SELL, price: parseValue(3), amount: 1n }),
+                new PlaceSellOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
+                new PlaceSellOrderAction({ describer, price: parseValue(2), maxAmount: 1n }),
+                new PlaceSellOrderAction({ describer, price: parseValue(3), maxAmount: 1n }),
             ],
         }
 
@@ -119,11 +118,11 @@ operatorPlaceBuyOrderScenarios.push([
         }
 
     }).then(function*(properties) {
-        yield new OperatorPlaceBuyOrderScenario(properties);
+        yield new PlaceBuyOrderScenario(properties);
     })
 ]);
 
-operatorPlaceBuyOrderScenarios.push([
+placeBuyOrderScenarios.push([
     'place buy order with common errors',
     generatorChain(function*() {
         yield {
@@ -136,10 +135,10 @@ operatorPlaceBuyOrderScenarios.push([
             describer: 'place buy order of 0 contracts (on ask price)',
             maxAmount: 0n,
             price: parseValue(1),
-            expectedErrorInResult: new InvalidAmount(),
             setupActions: [
-                new PlaceOrderAction({ describer, orderType: OrderType.SELL, price: parseValue(1), amount: 1n }),
+                new PlaceSellOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
             ],
+            expectedErrorInResult: new InvalidAmount(),
         };
         yield {
             describer: 'place buy order without funds',
@@ -153,10 +152,10 @@ operatorPlaceBuyOrderScenarios.push([
             maxAmount: 1n,
             price: parseValue(1),
             baseTokenBalance: 0n,
-            expectedErrorInResult: new DefaultError('ERC20: transfer amount exceeds balance'),
             setupActions: [
-                new PlaceOrderAction({ describer, orderType: OrderType.SELL, price: parseValue(1), amount: 1n }),
+                new PlaceSellOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
             ],
+            expectedErrorInResult: new DefaultError('ERC20: transfer amount exceeds balance'),
         };
         yield {
             describer: 'place buy order at price 0',
@@ -180,6 +179,6 @@ operatorPlaceBuyOrderScenarios.push([
         };
 
     }).then(function*(properties) {
-        yield new OperatorPlaceBuyOrderScenario(properties);
+        yield new PlaceBuyOrderScenario(properties);
     })
 ]);

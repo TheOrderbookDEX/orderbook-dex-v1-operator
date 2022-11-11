@@ -1,35 +1,50 @@
 import { ContractError, formatValue, parseValue } from '@frugal-wizard/abi2ts-lib';
-import { Account, AddContextFunction } from '@frugal-wizard/contract-test-helper';
+import { AddressBook } from '@frugal-wizard/addressbook/dist/AddressBook';
+import { Account, AddContextFunction, applySetupActions, BaseTestContext, TestScenario, TestScenarioProperties } from '@frugal-wizard/contract-test-helper';
 import { OperatorFactory } from '@theorderbookdex/orderbook-dex-operator/dist/OperatorFactory';
 import { OperatorV1 } from '../../src/OperatorV1';
-import { OrderbookContext, OrderbookScenario, OrderbookScenarioProperties } from './OrderbookScenario';
+import { ERC20Mock } from '@theorderbookdex/orderbook-dex/dist/testing/ERC20Mock';
+import { Orders } from '../state/Orders';
+import { OrderbookV1 } from '@theorderbookdex/orderbook-dex-v1/dist/OrderbookV1';
 
-export interface OperatorContext extends OrderbookContext {
+type ERC20MockInterface = Pick<ERC20Mock, keyof ERC20Mock>;
+
+export interface OperatorContext extends BaseTestContext {
     readonly caller: string;
     readonly operatorFactory: OperatorFactory;
     readonly operator: OperatorV1;
+    readonly addressBook: AddressBook;
+    readonly tradedToken: ERC20MockInterface;
+    readonly baseToken: ERC20MockInterface;
+    readonly orderbook: OrderbookV1;
 }
 
-export interface OperatorScenarioProperties extends OrderbookScenarioProperties<OperatorContext> {
+export interface OperatorScenarioProperties extends TestScenarioProperties<OperatorContext> {
     readonly caller?: Account;
     readonly expectedErrorInResult?: ContractError;
     readonly tradedTokenBalance?: bigint;
     readonly baseTokenBalance?: bigint;
+    readonly contractSize?: bigint;
+    readonly priceTick?: bigint;
 }
 
 export abstract class OperatorScenario<ExecuteResult, ExecuteStaticResult>
-    extends OrderbookScenario<OperatorContext, ExecuteResult, ExecuteStaticResult>
+    extends TestScenario<OperatorContext, ExecuteResult, ExecuteStaticResult>
 {
     readonly caller: Account;
     readonly expectedErrorInResult?: ContractError;
     readonly tradedTokenBalance: bigint;
     readonly baseTokenBalance: bigint;
+    readonly contractSize: bigint;
+    readonly priceTick: bigint;
 
     constructor({
         caller = Account.MAIN,
         expectedErrorInResult,
         tradedTokenBalance = parseValue(1000000),
         baseTokenBalance = parseValue(1000000),
+        contractSize = parseValue(10),
+        priceTick = parseValue(1),
         ...rest
     }: OperatorScenarioProperties) {
         super(rest);
@@ -37,6 +52,8 @@ export abstract class OperatorScenario<ExecuteResult, ExecuteStaticResult>
         this.expectedErrorInResult = expectedErrorInResult;
         this.tradedTokenBalance = tradedTokenBalance;
         this.baseTokenBalance = baseTokenBalance;
+        this.contractSize = contractSize;
+        this.priceTick = priceTick;
     }
 
     addContext(addContext: AddContextFunction): void {
@@ -50,23 +67,43 @@ export abstract class OperatorScenario<ExecuteResult, ExecuteStaticResult>
         if (this.baseTokenBalance != parseValue(1000000)) {
             addContext('baseTokenBalance', formatValue(this.baseTokenBalance));
         }
+        addContext('contractSize', formatValue(this.contractSize));
+        addContext('priceTick', formatValue(this.priceTick));
         super.addContext(addContext);
     }
 
     protected async _setup(): Promise<OperatorContext> {
         const ctx = await super._setup();
-        const { mainAccount, [this.caller]: caller, addressBook, tradedToken, baseToken } = ctx;
+        const { mainAccount, accounts, [this.caller]: caller } = ctx;
+        const addressBook = await AddressBook.deploy();
+        for (const from of accounts.slice(0, 2)) {
+            await addressBook.register({ from });
+        }
+        const tradedToken = await ERC20Mock.deploy('Traded Token', 'TRADED', 18);
+        await tradedToken.giveMultiple(accounts.map(account => [ account, parseValue(1000000) ]));
+        const baseToken = await ERC20Mock.deploy('Base Token', 'BASE', 18);
+        await baseToken.giveMultiple(accounts.map(account => [ account, parseValue(1000000) ]));
+        const { contractSize, priceTick } = this;
+        const orderbook = await OrderbookV1.deploy(addressBook, tradedToken, baseToken, contractSize, priceTick);
         const operatorFactory = await OperatorFactory.deploy(mainAccount, addressBook);
         await operatorFactory.registerVersion(10000n, await OperatorV1.deploy());
-        const operatorAddress = await operatorFactory.callStatic.createOperator(10000n);
-        await operatorFactory.createOperator(10000n);
-        const operator = OperatorV1.at(operatorAddress);
-        await tradedToken.give(operator, this.tradedTokenBalance);
-        await baseToken.give(operator, this.baseTokenBalance);
-        return { ...ctx, caller, operatorFactory, operator };
+        for (const from of accounts) {
+            const operatorAddress = await operatorFactory.callStatic.createOperator(10000n, { from });
+            await operatorFactory.createOperator(10000n, { from });
+            if (this.tradedTokenBalance) await tradedToken.give(operatorAddress, this.tradedTokenBalance);
+            if (this.baseTokenBalance) await baseToken.give(operatorAddress, this.baseTokenBalance);
+        }
+        const operator = OperatorV1.at(await operatorFactory.operator(mainAccount));
+        return { ...ctx, caller, operatorFactory, operator, addressBook, tradedToken, baseToken, orderbook };
     }
 
     async setup() {
         return await this._setup();
     }
+
+    get ordersBefore() {
+        return applySetupActions(this.setupActions, new Orders());
+    }
+
+    abstract get ordersAfter(): Orders;
 }

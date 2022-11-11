@@ -1,18 +1,18 @@
 import { formatValue, MAX_UINT8, Transaction } from '@frugal-wizard/abi2ts-lib';
 import { AddContextFunction } from '@frugal-wizard/contract-test-helper';
 import { SellAtMarketResultV1 } from '../../src/OperatorV1';
-import { FillAction } from '../action/FillAction';
+import { SellAtMarketAction } from '../action/SellAtMarketAction';
 import { Orders } from '../state/Orders';
 import { OrderType } from '../state/OrderType';
 import { OperatorContext, OperatorScenario, OperatorScenarioProperties } from './OperatorScenario';
 
-export interface OperatorBuyAtMarketScenarioProperties extends OperatorScenarioProperties {
+export interface SellAtMarketScenarioProperties extends OperatorScenarioProperties {
     readonly maxAmount: bigint;
     readonly minPrice?: bigint;
     readonly maxPricePoints?: number;
 }
 
-export class OperatorSellAtMarketScenario extends OperatorScenario<Transaction, SellAtMarketResultV1> {
+export class SellAtMarketScenario extends OperatorScenario<Transaction, SellAtMarketResultV1> {
     readonly maxAmount: bigint;
     readonly minPrice: bigint;
     readonly maxPricePoints: number;
@@ -22,7 +22,7 @@ export class OperatorSellAtMarketScenario extends OperatorScenario<Transaction, 
         minPrice = 0n,
         maxPricePoints = MAX_UINT8,
         ...rest
-    }: OperatorBuyAtMarketScenarioProperties) {
+    }: SellAtMarketScenarioProperties) {
         super(rest);
         this.maxAmount = maxAmount
         this.minPrice = minPrice;
@@ -49,7 +49,7 @@ export class OperatorSellAtMarketScenario extends OperatorScenario<Transaction, 
     }
 
     get ordersAfter(): Orders {
-        return new FillAction({ ...this, maxPrice: this.minPrice, orderType: OrderType.BUY }).apply(this.ordersBefore);
+        return new SellAtMarketAction(this).apply(this.ordersBefore);
     }
 
     get amountSold() {

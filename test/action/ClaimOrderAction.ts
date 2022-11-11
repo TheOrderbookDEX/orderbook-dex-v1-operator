@@ -1,17 +1,18 @@
 import { OrderType } from '../state/OrderType';
-import { OrderbookAction, OrderbookActionProperties } from './OrderbookAction';
+import { OperatorAction, OperatorActionProperties } from './OperatorAction';
 import { Orders } from '../state/Orders';
-import { OrderbookContext } from '../scenario/OrderbookScenario';
-import { MAX_UINT32 } from '@frugal-wizard/abi2ts-lib';
+import { decodeErrorData, MAX_UINT32 } from '@frugal-wizard/abi2ts-lib';
+import { OperatorContext } from '../scenario/OperatorScenario';
+import { OperatorV1 } from '../../src/OperatorV1';
 
-export interface ClaimOrderActionProperties extends OrderbookActionProperties {
+export interface ClaimOrderActionProperties extends OperatorActionProperties {
     readonly orderType: OrderType;
     readonly price: bigint;
     readonly orderId: bigint;
     readonly maxAmount?: bigint;
 }
 
-export class ClaimOrderAction extends OrderbookAction {
+export class ClaimOrderAction extends OperatorAction {
     readonly orderType: OrderType;
     readonly price: bigint;
     readonly orderId: bigint;
@@ -31,11 +32,14 @@ export class ClaimOrderAction extends OrderbookAction {
         this.maxAmount = maxAmount;
     }
 
-    async execute(ctx: OrderbookContext) {
-        const { addressBook, orderbook, } = ctx;
+    async execute(ctx: OperatorContext) {
+        const { addressBook, orderbook } = ctx;
         const { orderType, price, orderId, maxAmount } = this;
-        const from = await addressBook.addr((await orderbook.order(orderType, price, orderId)).owner);
-        await orderbook.claimOrder(orderType, price, orderId, maxAmount, { from });
+        const operator = OperatorV1.at(await addressBook.addr((await orderbook.order(orderType, price, orderId)).owner));
+        const from = await operator.owner();
+        const { failed, error } = await operator.callStatic.claimOrderV1(orderbook, orderType, price, orderId, maxAmount, { from });
+        if (failed) throw decodeErrorData(error);
+        await operator.claimOrderV1(orderbook, orderType, price, orderId, maxAmount, { from });
     }
 
     apply<T>(state: T) {

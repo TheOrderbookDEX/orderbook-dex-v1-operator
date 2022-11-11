@@ -5,14 +5,14 @@ import { Orders } from '../state/Orders';
 import { describeOrderType, OrderType } from '../state/OrderType';
 import { OperatorContext, OperatorScenario, OperatorScenarioProperties } from './OperatorScenario';
 
-export interface OperatorTransferOrderScenarioProperties extends OperatorScenarioProperties {
+export interface TransferOrderScenarioProperties extends OperatorScenarioProperties {
     readonly orderType: OrderType;
     readonly price: bigint;
     readonly orderId: bigint;
     readonly recipient: Account;
 }
 
-export class OperatorTransferOrderScenario extends OperatorScenario<Transaction, TransferOrderResultV1> {
+export class TransferOrderScenario extends OperatorScenario<Transaction, TransferOrderResultV1> {
     readonly orderType: OrderType;
     readonly price: bigint;
     readonly orderId: bigint;
@@ -24,7 +24,7 @@ export class OperatorTransferOrderScenario extends OperatorScenario<Transaction,
         orderId,
         recipient,
         ...rest
-    }: OperatorTransferOrderScenarioProperties) {
+    }: TransferOrderScenarioProperties) {
         super(rest);
         this.orderType = orderType
         this.price = price;

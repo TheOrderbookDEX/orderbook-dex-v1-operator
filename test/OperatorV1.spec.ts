@@ -2,13 +2,13 @@ import { DefaultOverrides } from '@frugal-wizard/abi2ts-lib';
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { describeError, is } from '@frugal-wizard/contract-test-helper';
-import { operatorBuyAtMarketScenarios } from './scenarios/operatorBuyAtMarketScenarios';
-import { operatorCancelOrderScenarios } from './scenarios/operatorCancelOrderScenarios';
-import { operatorClaimOrderScenarios } from './scenarios/operatorClaimOrderScenarios';
-import { operatorPlaceBuyOrderScenarios } from './scenarios/operatorPlaceBuyOrderScenarios';
-import { operatorPlaceSellOrderScenarios } from './scenarios/operatorPlaceSellOrderScenarios';
-import { operatorSellAtMarketScenarios } from './scenarios/operatorSellAtMarketScenarios';
-import { operatorTransferOrderScenarios } from './scenarios/operatorTransferOrderScenarios';
+import { buyAtMarketScenarios } from './scenarios/buyAtMarketScenarios';
+import { cancelOrderScenarios } from './scenarios/cancelOrderScenarios';
+import { claimOrderScenarios } from './scenarios/claimOrderScenarios';
+import { placeBuyOrderScenarios } from './scenarios/placeBuyOrderScenarios';
+import { placeSellOrderScenarios } from './scenarios/placeSellOrderScenarios';
+import { sellAtMarketScenarios } from './scenarios/sellAtMarketScenarios';
+import { transferOrderScenarios } from './scenarios/transferOrderScenarios';
 import { OrderType } from './state/OrderType';
 import { BoughtAtMarketV1, Failed, OrderCanceledV1, OrderClaimedV1, OrderTransferedV1, PlacedBuyOrderV1, PlacedSellOrderV1, SoldAtMarketV1 } from '../src/OperatorV1';
 
@@ -18,7 +18,7 @@ DefaultOverrides.gasLimit = 5000000;
 
 describe('OperatorV1', () => {
     describe('buyAtMarket', () => {
-        for (const [ description, scenarios ] of operatorBuyAtMarketScenarios) {
+        for (const [ description, scenarios ] of buyAtMarketScenarios) {
             describe(description, () => {
                 for (const scenario of scenarios) {
                     scenario.describe(({ it }) => {
@@ -153,7 +153,7 @@ describe('OperatorV1', () => {
     });
 
     describe('sellAtMarket', () => {
-        for (const [ description, scenarios ] of operatorSellAtMarketScenarios) {
+        for (const [ description, scenarios ] of sellAtMarketScenarios) {
             describe(description, () => {
                 for (const scenario of scenarios) {
                     scenario.describe(({ it }) => {
@@ -288,7 +288,7 @@ describe('OperatorV1', () => {
     });
 
     describe('placeBuyOrder', () => {
-        for (const [ description, scenarios ] of operatorPlaceBuyOrderScenarios) {
+        for (const [ description, scenarios ] of placeBuyOrderScenarios) {
             describe(description, () => {
                 for (const scenario of scenarios) {
                     scenario.describe(({ it }) => {
@@ -455,7 +455,7 @@ describe('OperatorV1', () => {
     });
 
     describe('placeSellOrder', () => {
-        for (const [ description, scenarios ] of operatorPlaceSellOrderScenarios) {
+        for (const [ description, scenarios ] of placeSellOrderScenarios) {
             describe(description, () => {
                 for (const scenario of scenarios) {
                     scenario.describe(({ it }) => {
@@ -622,7 +622,7 @@ describe('OperatorV1', () => {
     });
 
     describe('claimOrder', () => {
-        for (const [ description, scenarios ] of operatorClaimOrderScenarios) {
+        for (const [ description, scenarios ] of claimOrderScenarios) {
             describe(description, () => {
                 for (const scenario of scenarios) {
                     scenario.describe(({ it }) => {
@@ -741,7 +741,7 @@ describe('OperatorV1', () => {
     });
 
     describe('transferOrder', () => {
-        for (const [ description, scenarios ] of operatorTransferOrderScenarios) {
+        for (const [ description, scenarios ] of transferOrderScenarios) {
             describe(description, () => {
                 for (const scenario of scenarios) {
                     scenario.describe(({ it }) => {
@@ -811,7 +811,7 @@ describe('OperatorV1', () => {
     });
 
     describe('cancelOrder', () => {
-        for (const [ description, scenarios ] of operatorCancelOrderScenarios) {
+        for (const [ description, scenarios ] of cancelOrderScenarios) {
             describe(description, () => {
                 for (const scenario of scenarios) {
                     scenario.describe(({ it }) => {

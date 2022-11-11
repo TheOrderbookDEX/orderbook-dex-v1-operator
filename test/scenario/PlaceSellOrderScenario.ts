@@ -1,19 +1,18 @@
 import { formatValue, MAX_UINT8, Transaction } from '@frugal-wizard/abi2ts-lib';
 import { AddContextFunction } from '@frugal-wizard/contract-test-helper';
 import { PlaceSellOrderResultV1 } from '../../src/OperatorV1';
-import { FillAction } from '../action/FillAction';
-import { PlaceOrderAction } from '../action/PlaceOrderAction';
+import { PlaceSellOrderAction } from '../action/PlaceSellOrderAction';
 import { Orders } from '../state/Orders';
 import { OrderType } from '../state/OrderType';
 import { OperatorContext, OperatorScenario, OperatorScenarioProperties } from './OperatorScenario';
 
-export interface OperatorPlaceSellOrderScenarioProperties extends OperatorScenarioProperties {
+export interface PlaceSellOrderScenarioProperties extends OperatorScenarioProperties {
     readonly maxAmount: bigint;
     readonly price: bigint;
     readonly maxPricePoints?: number;
 }
 
-export class OperatorPlaceSellOrderScenario extends OperatorScenario<Transaction, PlaceSellOrderResultV1> {
+export class PlaceSellOrderScenario extends OperatorScenario<Transaction, PlaceSellOrderResultV1> {
     readonly maxAmount: bigint;
     readonly price: bigint;
     readonly maxPricePoints: number;
@@ -23,7 +22,7 @@ export class OperatorPlaceSellOrderScenario extends OperatorScenario<Transaction
         price,
         maxPricePoints = MAX_UINT8,
         ...rest
-    }: OperatorPlaceSellOrderScenarioProperties) {
+    }: PlaceSellOrderScenarioProperties) {
         super(rest);
         this.maxAmount = maxAmount
         this.price = price;
@@ -48,16 +47,7 @@ export class OperatorPlaceSellOrderScenario extends OperatorScenario<Transaction
     }
 
     get ordersAfter(): Orders {
-        let orders = this.ordersBefore;
-        const totalAvailableBefore = orders.totalAvailable(OrderType.BUY);
-        orders = new FillAction({ ...this, orderType: OrderType.BUY, maxPrice: this.price }).apply(orders);
-        const amount = this.maxAmount - (totalAvailableBefore - orders.totalAvailable(OrderType.BUY));
-        try {
-            orders = new PlaceOrderAction({ ...this, orderType: OrderType.SELL, amount }).apply(orders);
-        } catch {
-            // ignore
-        }
-        return orders;
+        return new PlaceSellOrderAction(this).apply(this.ordersBefore);
     }
 
     get amountSold() {

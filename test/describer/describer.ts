@@ -1,17 +1,18 @@
 import { formatValue, MAX_UINT256, MAX_UINT32, MAX_UINT8 } from '@frugal-wizard/abi2ts-lib';
 import { Account, ConfigurableDescriber } from '@frugal-wizard/contract-test-helper';
+import { BuyAtMarketAction } from '../action/BuyAtMarketAction';
 import { CancelOrderAction } from '../action/CancelOrderAction';
 import { ClaimOrderAction } from '../action/ClaimOrderAction';
-import { FillAction } from '../action/FillAction';
-import { PlaceOrderAction } from '../action/PlaceOrderAction';
-import { TransferOrderToOperatorAction } from '../action/TransferOrderToOperatorAction';
-import { OperatorBuyAtMarketScenario } from '../scenario/OperatorBuyAtMarketScenario';
-import { OperatorCancelOrderScenario } from '../scenario/OperatorCancelOrderScenario';
-import { OperatorClaimOrderScenario } from '../scenario/OperatorClaimOrderScenario';
-import { OperatorPlaceBuyOrderScenario } from '../scenario/OperatorPlaceBuyOrderScenario';
-import { OperatorPlaceSellOrderScenario } from '../scenario/OperatorPlaceSellOrderScenario';
-import { OperatorSellAtMarketScenario } from '../scenario/OperatorSellAtMarketScenario';
-import { OperatorTransferOrderScenario } from '../scenario/OperatorTransferOrderScenario';
+import { PlaceBuyOrderAction } from '../action/PlaceBuyOrderAction';
+import { PlaceSellOrderAction } from '../action/PlaceSellOrderAction';
+import { SellAtMarketAction } from '../action/SellAtMarketAction';
+import { BuyAtMarketScenario } from '../scenario/BuyAtMarketScenario';
+import { CancelOrderScenario } from '../scenario/CancelOrderScenario';
+import { ClaimOrderScenario } from '../scenario/ClaimOrderScenario';
+import { PlaceBuyOrderScenario } from '../scenario/PlaceBuyOrderScenario';
+import { PlaceSellOrderScenario } from '../scenario/PlaceSellOrderScenario';
+import { SellAtMarketScenario } from '../scenario/SellAtMarketScenario';
+import { TransferOrderScenario } from '../scenario/TransferOrderScenario';
 import { describeOrderType, OrderType } from '../state/OrderType';
 
 export interface OrderbookTestDescriberConfig {
@@ -49,17 +50,6 @@ function describeMaxAmountOfContracts(description: string[], scenario: { maxAmou
             description.push(preposition);
         }
         description.push(`${maxAmount} or less contracts`);
-    }
-}
-
-function describeAmountOfContracts(description: string[], scenario: { amount: bigint }, config: { hideAmount?: boolean }, preposition?: string) {
-    const { amount } = scenario;
-    const { hideAmount } = config;
-    if (!hideAmount) {
-        if (preposition) {
-            description.push(preposition);
-        }
-        description.push(`${amount} contract${ amount != 1n ? 's' : '' }`);
     }
 }
 
@@ -118,23 +108,6 @@ function describeOrder(description: string[], scenario: { orderType: OrderType, 
     }
 }
 
-function describeFillPricePoint(description: string[], scenario: { orderType: OrderType, maxPrice: bigint }, config: { hideOrderType?: boolean, hidePrice?: boolean }) {
-    const { orderType, maxPrice } = scenario;
-    const { hideOrderType, hidePrice } = config;
-    if (!hideOrderType) {
-        description.push(describeOrderType(orderType));
-    }
-    if (!hideOrderType && !hidePrice) {
-        description.push('at');
-    }
-    if (!hidePrice
-     && !(orderType == OrderType.SELL && maxPrice == MAX_UINT256)
-     && !(orderType == OrderType.BUY && maxPrice == 0n)) {
-        description.push(formatValue(maxPrice));
-        description.push('or better');
-    }
-}
-
 function describeScenario(description: string[], scenario: { contractSize: bigint, priceTick: bigint }, config: { hideContractSize?: boolean, hidePriceTick?: boolean }) {
     const { contractSize, priceTick } = scenario;
     const { hideContractSize, hidePriceTick } = config;
@@ -152,20 +125,35 @@ function describeScenario(description: string[], scenario: { contractSize: bigin
     }
 }
 
-describer.addDescriber(PlaceOrderAction, (action, config = {}) => {
-    const description = ['place'];
-    describeOrder(description, action, config);
-    describeAmountOfContracts(description, action, config, 'of');
+describer.addDescriber(BuyAtMarketAction, (action, config = {}) => {
+    const description = ['buy at market'];
+    describeMaxAmountOfContracts(description, action, config);
+    describeMaxPrice(description, action, config);
+    describeMaxPricePoints(description, action);
+    return description.join(' ');
+});
+
+describer.addDescriber(SellAtMarketAction, (action, config = {}) => {
+    const description = ['buy at market'];
+    describeMaxAmountOfContracts(description, action, config);
+    describeMinPrice(description, action, config);
+    describeMaxPricePoints(description, action);
+    return description.join(' ');
+});
+
+describer.addDescriber(PlaceBuyOrderAction, (action, config = {}) => {
+    const description = ['place buy order'];
+    describeMaxAmountOfContracts(description, action, config, 'of');
+    describePriceLimit(description, action, config);
     describeCaller(description, action);
     return description.join(' ');
 });
 
-describer.addDescriber(FillAction, (action, config = {}) => {
-    const description = ['fill'];
-    describeMaxAmountOfContracts(description, action, config);
-    describeFillPricePoint(description, action, config);
-    description.push('orders');
-    describeMaxPricePoints(description, action);
+describer.addDescriber(PlaceSellOrderAction, (action, config = {}) => {
+    const description = ['place sell order'];
+    describeMaxAmountOfContracts(description, action, config, 'of');
+    describePriceLimit(description, action, config);
+    describeCaller(description, action);
     return description.join(' ');
 });
 
@@ -182,14 +170,7 @@ describer.addDescriber(CancelOrderAction, (action, config = {}) => {
     return description.join(' ');
 });
 
-describer.addDescriber(TransferOrderToOperatorAction, (action, config = {}) => {
-    const description = ['transfer'];
-    describeOrder(description, action, config);
-    description.push('to operator');
-    return description.join(' ');
-});
-
-describer.addDescriber(OperatorBuyAtMarketScenario, (scenario, config = {}) => {
+describer.addDescriber(BuyAtMarketScenario, (scenario, config = {}) => {
     const description = ['buy at market'];
     describeMaxAmountOfContracts(description, scenario, config);
     describeMaxPrice(description, scenario, config);
@@ -200,7 +181,7 @@ describer.addDescriber(OperatorBuyAtMarketScenario, (scenario, config = {}) => {
     return description.join(' ');
 });
 
-describer.addDescriber(OperatorSellAtMarketScenario, (scenario, config = {}) => {
+describer.addDescriber(SellAtMarketScenario, (scenario, config = {}) => {
     const description = ['sell at market'];
     describeMaxAmountOfContracts(description, scenario, config);
     describeMinPrice(description, scenario, config);
@@ -211,7 +192,7 @@ describer.addDescriber(OperatorSellAtMarketScenario, (scenario, config = {}) => 
     return description.join(' ');
 });
 
-describer.addDescriber(OperatorPlaceBuyOrderScenario, (scenario, config = {}) => {
+describer.addDescriber(PlaceBuyOrderScenario, (scenario, config = {}) => {
     const description = ['place buy order'];
     describeMaxAmountOfContracts(description, scenario, config, 'of');
     describePriceLimit(description, scenario, config);
@@ -222,7 +203,7 @@ describer.addDescriber(OperatorPlaceBuyOrderScenario, (scenario, config = {}) =>
     return description.join(' ');
 });
 
-describer.addDescriber(OperatorPlaceSellOrderScenario, (scenario, config = {}) => {
+describer.addDescriber(PlaceSellOrderScenario, (scenario, config = {}) => {
     const description = ['place sell order'];
     describeMaxAmountOfContracts(description, scenario, config, 'of');
     describePriceLimit(description, scenario, config);
@@ -233,7 +214,7 @@ describer.addDescriber(OperatorPlaceSellOrderScenario, (scenario, config = {}) =
     return description.join(' ');
 });
 
-describer.addDescriber(OperatorClaimOrderScenario, (scenario, config = {}) => {
+describer.addDescriber(ClaimOrderScenario, (scenario, config = {}) => {
     const description = ['claim'];
     describeMaxAmountOfContracts(description, scenario, config);
     description.push('from');
@@ -244,7 +225,7 @@ describer.addDescriber(OperatorClaimOrderScenario, (scenario, config = {}) => {
     return description.join(' ');
 });
 
-describer.addDescriber(OperatorTransferOrderScenario, (scenario, config = {}) => {
+describer.addDescriber(TransferOrderScenario, (scenario, config = {}) => {
     const description = ['transfer'];
     describeOrder(description, scenario, config);
     description.push(`to ${scenario.recipient}`);
@@ -254,7 +235,7 @@ describer.addDescriber(OperatorTransferOrderScenario, (scenario, config = {}) =>
     return description.join(' ');
 });
 
-describer.addDescriber(OperatorCancelOrderScenario, (scenario, config = {}) => {
+describer.addDescriber(CancelOrderScenario, (scenario, config = {}) => {
     const description = ['cancel'];
     describeOrder(description, scenario, config);
     describeCaller(description, scenario);

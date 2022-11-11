@@ -1,39 +1,37 @@
-import { formatValue, MAX_UINT256, MAX_UINT8, Transaction } from '@frugal-wizard/abi2ts-lib';
+import { formatValue, MAX_UINT8, Transaction } from '@frugal-wizard/abi2ts-lib';
 import { AddContextFunction } from '@frugal-wizard/contract-test-helper';
-import { BuyAtMarketResultV1 } from '../../src/OperatorV1';
-import { FillAction } from '../action/FillAction';
+import { PlaceBuyOrderResultV1 } from '../../src/OperatorV1';
+import { PlaceBuyOrderAction } from '../action/PlaceBuyOrderAction';
 import { Orders } from '../state/Orders';
 import { OrderType } from '../state/OrderType';
 import { OperatorContext, OperatorScenario, OperatorScenarioProperties } from './OperatorScenario';
 
-export interface OperatorBuyAtMarketScenarioProperties extends OperatorScenarioProperties {
+export interface PlaceBuyOrderScenarioProperties extends OperatorScenarioProperties {
     readonly maxAmount: bigint;
-    readonly maxPrice?: bigint;
+    readonly price: bigint;
     readonly maxPricePoints?: number;
 }
 
-export class OperatorBuyAtMarketScenario extends OperatorScenario<Transaction, BuyAtMarketResultV1> {
+export class PlaceBuyOrderScenario extends OperatorScenario<Transaction, PlaceBuyOrderResultV1> {
     readonly maxAmount: bigint;
-    readonly maxPrice: bigint;
+    readonly price: bigint;
     readonly maxPricePoints: number;
 
     constructor({
         maxAmount,
-        maxPrice = MAX_UINT256,
+        price,
         maxPricePoints = MAX_UINT8,
         ...rest
-    }: OperatorBuyAtMarketScenarioProperties) {
+    }: PlaceBuyOrderScenarioProperties) {
         super(rest);
         this.maxAmount = maxAmount
-        this.maxPrice = maxPrice;
+        this.price = price;
         this.maxPricePoints = maxPricePoints;
     }
 
     addContext(addContext: AddContextFunction): void {
         addContext('maxAmount', String(this.maxAmount));
-        if (this.maxPrice != MAX_UINT256) {
-            addContext('maxPrice', formatValue(this.maxPrice));
-        }
+        addContext('price', formatValue(this.price));
         if (this.maxPricePoints != MAX_UINT8) {
             addContext('maxPricePoints', String(this.maxPricePoints));
         }
@@ -41,15 +39,15 @@ export class OperatorBuyAtMarketScenario extends OperatorScenario<Transaction, B
     }
 
     async execute({ caller, operator, orderbook }: OperatorContext) {
-        return await operator.buyAtMarketV1(orderbook, this.maxAmount, this.maxPrice, this.maxPricePoints, { from: caller });
+        return await operator.placeBuyOrderV1(orderbook, this.maxAmount, this.price, this.maxPricePoints, { from: caller });
     }
 
     async executeStatic({ caller, operator, orderbook }: OperatorContext) {
-        return await operator.callStatic.buyAtMarketV1(orderbook, this.maxAmount, this.maxPrice, this.maxPricePoints, { from: caller });
+        return await operator.callStatic.placeBuyOrderV1(orderbook, this.maxAmount, this.price, this.maxPricePoints, { from: caller });
     }
 
     get ordersAfter(): Orders {
-        return new FillAction({ ...this, orderType: OrderType.SELL }).apply(this.ordersBefore);
+        return new PlaceBuyOrderAction(this).apply(this.ordersBefore);
     }
 
     get amountBought() {
@@ -71,5 +69,26 @@ export class OperatorBuyAtMarketScenario extends OperatorScenario<Transaction, B
             }
         }
         return amountPaid;
+    }
+
+    get amountPlaced() {
+        return this.ordersAfter.available(OrderType.BUY, this.price)
+            - this.ordersBefore.available(OrderType.BUY, this.price);
+    }
+
+    get orderId() {
+        if (this.amountPlaced) {
+            return this.ordersAfter.lastOrderId(OrderType.BUY, this.price);
+        } else {
+            return 0n;
+        }
+    }
+
+    get actualOrderId() {
+        if (this.amountPlaced) {
+            return this.ordersAfter.lastOrderId(OrderType.BUY, this.price);
+        } else {
+            return 0n;
+        }
     }
 }

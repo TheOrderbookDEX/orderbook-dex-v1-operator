@@ -5,14 +5,14 @@ import { CancelOrderAction } from '../action/CancelOrderAction';
 import { describeOrderType, OrderType } from '../state/OrderType';
 import { OperatorContext, OperatorScenario, OperatorScenarioProperties } from './OperatorScenario';
 
-export interface OperatorCancelOrderScenarioProperties extends OperatorScenarioProperties {
+export interface CancelOrderScenarioProperties extends OperatorScenarioProperties {
     readonly orderType: OrderType;
     readonly price: bigint;
     readonly orderId: bigint;
     readonly maxLastOrderId?: bigint;
 }
 
-export class OperatorCancelOrderScenario extends OperatorScenario<Transaction, CancelOrderResultV1> {
+export class CancelOrderScenario extends OperatorScenario<Transaction, CancelOrderResultV1> {
     readonly orderType: OrderType;
     readonly price: bigint;
     readonly orderId: bigint;
@@ -24,7 +24,7 @@ export class OperatorCancelOrderScenario extends OperatorScenario<Transaction, C
         orderId,
         maxLastOrderId = MAX_UINT32,
         ...rest
-    }: OperatorCancelOrderScenarioProperties) {
+    }: CancelOrderScenarioProperties) {
         super(rest);
         this.orderType = orderType
         this.price = price;

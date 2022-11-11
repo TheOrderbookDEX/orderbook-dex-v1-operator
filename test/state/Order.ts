@@ -1,19 +1,11 @@
-import { Account } from '@frugal-wizard/contract-test-helper';
 import { OrderType } from './OrderType';
-
-export enum SpecialAccount {
-    OPERATOR = 'operator',
-    PUPPET = 'puppet',
-}
-
-export type OrderOwner = Account | SpecialAccount;
 
 export class Order {
     filled: bigint;
     claimed: bigint;
     deleted: boolean;
 
-    constructor(public owner: OrderOwner, public orderType: OrderType, public price: bigint, public amount: bigint) {
+    constructor(public owner: string, public orderType: OrderType, public price: bigint, public amount: bigint) {
         this.filled = 0n;
         this.claimed = 0n;
         this.deleted = false;
@@ -67,7 +59,7 @@ export class Order {
         }
     }
 
-    transfer(recipient: OrderOwner) {
+    transfer(recipient: string) {
         this.owner = recipient;
     }
 }

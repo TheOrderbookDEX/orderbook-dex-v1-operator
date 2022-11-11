@@ -1,4 +1,4 @@
-import { Order, OrderOwner } from './Order';
+import { Order } from './Order';
 import { isEqualOrBetterPrice, OrderType } from './OrderType';
 
 type OrderWithId = Order & { orderId: bigint };
@@ -14,7 +14,7 @@ export class Orders {
         return this.orders[Symbol.iterator]();
     }
 
-    add(account: OrderOwner, orderType: OrderType, price: bigint, amount: bigint) {
+    add(account: string, orderType: OrderType, price: bigint, amount: bigint) {
         if (amount == 0n) {
             throw new Error('amount is 0');
         }

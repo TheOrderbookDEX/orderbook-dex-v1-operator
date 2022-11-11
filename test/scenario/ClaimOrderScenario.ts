@@ -6,14 +6,14 @@ import { Orders } from '../state/Orders';
 import { describeOrderType, OrderType } from '../state/OrderType';
 import { OperatorContext, OperatorScenario, OperatorScenarioProperties } from './OperatorScenario';
 
-export interface OperatorClaimOrderScenarioProperties extends OperatorScenarioProperties {
+export interface ClaimOrderScenarioProperties extends OperatorScenarioProperties {
     readonly orderType: OrderType;
     readonly price: bigint;
     readonly orderId: bigint;
     readonly maxAmount?: bigint;
 }
 
-export class OperatorClaimOrderScenario extends OperatorScenario<Transaction, ClaimOrderResultV1> {
+export class ClaimOrderScenario extends OperatorScenario<Transaction, ClaimOrderResultV1> {
     readonly orderType: OrderType;
     readonly price: bigint;
     readonly orderId: bigint;
@@ -25,7 +25,7 @@ export class OperatorClaimOrderScenario extends OperatorScenario<Transaction, Cl
         orderId,
         maxAmount = MAX_UINT32,
         ...rest
-    }: OperatorClaimOrderScenarioProperties) {
+    }: ClaimOrderScenarioProperties) {
         super(rest);
         this.orderType = orderType
         this.price = price;
