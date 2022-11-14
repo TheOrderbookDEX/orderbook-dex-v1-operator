@@ -18,7 +18,7 @@
     "@openzeppelin/contracts": "4.8.0",
     "@theorderbookdex/orderbook-dex": "1.0.0-rc.7",
     "@theorderbookdex/orderbook-dex-operator": "1.0.0-rc.9",
-    "@theorderbookdex/orderbook-dex-v1": "1.0.0-rc.7"
+    "@theorderbookdex/orderbook-dex-v1": "1.0.0-rc.8"
   },
   "devDependencies": {
     "@frugal-wizard/abi2ts": "^0.5.0",
