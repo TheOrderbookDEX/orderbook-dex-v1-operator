@@ -1,19 +1,19 @@
 import { formatValue, MAX_UINT256, MAX_UINT32, MAX_UINT8 } from '@frugal-wizard/abi2ts-lib';
 import { Account, ConfigurableDescriber } from '@frugal-wizard/contract-test-helper';
-import { BuyAtMarketAction } from '../action/BuyAtMarketAction';
-import { CancelOrderAction } from '../action/CancelOrderAction';
-import { ClaimOrderAction } from '../action/ClaimOrderAction';
-import { PlaceBuyOrderAction } from '../action/PlaceBuyOrderAction';
-import { PlaceSellOrderAction } from '../action/PlaceSellOrderAction';
-import { SellAtMarketAction } from '../action/SellAtMarketAction';
-import { BuyAtMarketScenario } from '../scenario/BuyAtMarketScenario';
-import { CancelOrderScenario } from '../scenario/CancelOrderScenario';
-import { ClaimOrderScenario } from '../scenario/ClaimOrderScenario';
-import { PlaceBuyOrderScenario } from '../scenario/PlaceBuyOrderScenario';
-import { PlaceSellOrderScenario } from '../scenario/PlaceSellOrderScenario';
+import { BuyAtMarketAction } from '../action/BuyAtMarket';
+import { CancelOrderAction } from '../action/CancelOrder';
+import { ClaimOrderAction } from '../action/ClaimOrder';
+import { PlaceBuyOrderAction } from '../action/PlaceBuyOrder';
+import { PlaceSellOrderAction } from '../action/PlaceSellOrder';
+import { SellAtMarketAction } from '../action/SellAtMarket';
+import { BuyAtMarketScenario } from '../scenario/BuyAtMarket';
+import { CancelOrderScenario } from '../scenario/CancelOrder';
+import { ClaimOrderScenario } from '../scenario/ClaimOrder';
+import { PlaceBuyOrderScenario } from '../scenario/PlaceBuyOrder';
+import { PlaceSellOrderScenario } from '../scenario/PlaceSellOrder';
 import { PricePointsScenario } from '../scenario/PricePoints';
-import { SellAtMarketScenario } from '../scenario/SellAtMarketScenario';
-import { TransferOrderScenario } from '../scenario/TransferOrderScenario';
+import { SellAtMarketScenario } from '../scenario/SellAtMarket';
+import { TransferOrderScenario } from '../scenario/TransferOrder';
 import { describeOrderType, OrderType } from '../state/OrderType';
 
 export interface OrderbookTestDescriberConfig {

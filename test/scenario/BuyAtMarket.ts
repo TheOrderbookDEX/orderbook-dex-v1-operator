@@ -1,10 +1,10 @@
 import { formatValue, MAX_UINT256, MAX_UINT8, Transaction } from '@frugal-wizard/abi2ts-lib';
 import { AddContextFunction } from '@frugal-wizard/contract-test-helper';
 import { BuyAtMarketResultV1 } from '../../src/OperatorV1';
-import { BuyAtMarketAction } from '../action/BuyAtMarketAction';
+import { BuyAtMarketAction } from '../action/BuyAtMarket';
 import { Orders } from '../state/Orders';
 import { OrderType } from '../state/OrderType';
-import { OperatorContext, OperatorScenario, OperatorScenarioProperties } from './OperatorScenario';
+import { OperatorContext, OperatorScenario, OperatorScenarioProperties } from './Operator';
 
 export interface BuyAtMarketScenarioProperties extends OperatorScenarioProperties {
     readonly maxAmount: bigint;

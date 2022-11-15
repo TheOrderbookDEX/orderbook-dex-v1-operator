@@ -1,16 +1,16 @@
 import { DefaultError, parseValue } from '@frugal-wizard/abi2ts-lib';
 import { Account, generatorChain, range } from '@frugal-wizard/contract-test-helper';
-import { InvalidAmount, InvalidPrice } from '@theorderbookdex/orderbook-dex-v1/dist/interfaces/IOrderbookV1';
+import { InvalidAmount, InvalidArgument } from '@theorderbookdex/orderbook-dex-v1/dist/interfaces/IOrderbookV1';
 import { Unauthorized } from '../../src/OperatorV1';
-import { PlaceBuyOrderAction } from '../action/PlaceBuyOrderAction';
+import { PlaceSellOrderAction } from '../action/PlaceSellOrder';
 import { EXHAUSTIVE } from '../config';
 import { describer } from '../describer/describer';
-import { PlaceSellOrderScenario } from '../scenario/PlaceSellOrderScenario';
+import { BuyAtMarketScenario } from '../scenario/BuyAtMarket';
 
-export const placeSellOrderScenarios: [string, Iterable<PlaceSellOrderScenario>][] = [];
+export const buyAtMarketScenarios: [string, Iterable<BuyAtMarketScenario>][] = [];
 
-placeSellOrderScenarios.push([
-    'place sell order',
+buyAtMarketScenarios.push([
+    'buy at market',
     generatorChain(function*() {
         yield {
             describer: describer.clone().configure({
@@ -38,7 +38,7 @@ placeSellOrderScenarios.push([
                 ...properties,
                 setupActions: [
                     ...setupActions,
-                    new PlaceBuyOrderAction({ describer, price: parseValue(1), maxAmount })
+                    new PlaceSellOrderAction({ describer, price: parseValue(1), maxAmount })
                 ],
             };
         }
@@ -52,7 +52,7 @@ placeSellOrderScenarios.push([
                 ...properties,
                 setupActions: [
                     ...setupActions,
-                    new PlaceBuyOrderAction({ describer, price: parseValue(2), maxAmount })
+                    new PlaceSellOrderAction({ describer, price: parseValue(2), maxAmount })
                 ],
             };
         }
@@ -66,26 +66,18 @@ placeSellOrderScenarios.push([
                 ...properties,
                 setupActions: [
                     ...setupActions,
-                    new PlaceBuyOrderAction({ describer, price: parseValue(3), maxAmount })
+                    new PlaceSellOrderAction({ describer, price: parseValue(3), maxAmount })
                 ],
             };
         }
 
     }).then(function*(properties) {
-        for (const price of [...range(1, 3)].map(v => parseValue(v))) {
-            yield {
-                ...properties,
-                price,
-            };
-        }
-
-    }).then(function*(properties) {
-        yield new PlaceSellOrderScenario(properties);
+        yield new BuyAtMarketScenario(properties);
     })
 ]);
 
-placeSellOrderScenarios.push([
-    'place sell order using maxPricePoints',
+buyAtMarketScenarios.push([
+    'buy at market using maxPrice',
     generatorChain(function*() {
         yield {
             describer: describer.clone().configure({
@@ -100,12 +92,48 @@ placeSellOrderScenarios.push([
         const { describer } = properties;
         yield {
             ...properties,
-            maxAmount: 4n,
-            price: parseValue(1),
+            maxAmount: 3n,
             setupActions: [
-                new PlaceBuyOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
-                new PlaceBuyOrderAction({ describer, price: parseValue(2), maxAmount: 1n }),
-                new PlaceBuyOrderAction({ describer, price: parseValue(3), maxAmount: 1n }),
+                new PlaceSellOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
+                new PlaceSellOrderAction({ describer, price: parseValue(2), maxAmount: 1n }),
+                new PlaceSellOrderAction({ describer, price: parseValue(3), maxAmount: 1n }),
+            ],
+        }
+
+    }).then(function*(properties) {
+        for (const maxPrice of [...range(1, 3)].map(v => parseValue(v))) {
+            yield {
+                ...properties,
+                maxPrice,
+            };
+        }
+
+    }).then(function*(properties) {
+        yield new BuyAtMarketScenario(properties);
+    })
+]);
+
+buyAtMarketScenarios.push([
+    'buy at market using maxPricePoints',
+    generatorChain(function*() {
+        yield {
+            describer: describer.clone().configure({
+                hideOrderId: true,
+                hideContractSize: true,
+                hidePriceTick: true,
+                hideAmount: true,
+            }),
+        };
+
+    }).then(function*(properties) {
+        const { describer } = properties;
+        yield {
+            ...properties,
+            maxAmount: 3n,
+            setupActions: [
+                new PlaceSellOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
+                new PlaceSellOrderAction({ describer, price: parseValue(2), maxAmount: 1n }),
+                new PlaceSellOrderAction({ describer, price: parseValue(3), maxAmount: 1n }),
             ],
         }
 
@@ -118,67 +146,50 @@ placeSellOrderScenarios.push([
         }
 
     }).then(function*(properties) {
-        yield new PlaceSellOrderScenario(properties);
+        yield new BuyAtMarketScenario(properties);
     })
 ]);
 
-placeSellOrderScenarios.push([
-    'place sell order with common errors',
+buyAtMarketScenarios.push([
+    'buy at market with common errors',
     generatorChain(function*() {
         yield {
-            describer: 'place sell order of 0 contracts',
+            describer: 'buy at market 0 contracts',
             maxAmount: 0n,
-            price: parseValue(1),
-            expectedErrorInResult: new InvalidAmount(),
-        };
-        yield {
-            describer: 'place sell order of 0 contracts (on bid price)',
-            maxAmount: 0n,
-            price: parseValue(1),
             setupActions: [
-                new PlaceBuyOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
+                new PlaceSellOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
             ],
             expectedErrorInResult: new InvalidAmount(),
         };
         yield {
-            describer: 'place sell order without funds',
+            describer: 'buy at market without funds',
             maxAmount: 1n,
-            price: parseValue(1),
-            tradedTokenBalance: 0n,
-            expectedErrorInResult: new DefaultError('ERC20: transfer amount exceeds balance'),
-        };
-        yield {
-            describer: 'place sell order without funds (on bid price)',
-            maxAmount: 1n,
-            price: parseValue(1),
-            tradedTokenBalance: 0n,
+            baseTokenBalance: 0n,
             setupActions: [
-                new PlaceBuyOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
+                new PlaceSellOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
             ],
             expectedErrorInResult: new DefaultError('ERC20: transfer amount exceeds balance'),
         };
         yield {
-            describer: 'place sell order at price 0',
+            describer: 'buy at market using maxPricePoints 0',
             maxAmount: 1n,
-            price: parseValue(0),
-            expectedErrorInResult: new InvalidPrice(),
+            maxPricePoints: 0,
+            setupActions: [
+                new PlaceSellOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
+            ],
+            expectedErrorInResult: new InvalidArgument(),
         };
         yield {
-            describer: 'place sell order at price not divisible by price tick',
-            maxAmount: 1n,
-            price: parseValue(1),
-            priceTick: parseValue(10),
-            expectedErrorInResult: new InvalidPrice(),
-        };
-        yield {
-            describer: 'place sell order using account that is not the operator owner',
+            describer: 'buy at market using account that is not the operator owner',
             caller: Account.SECOND,
             maxAmount: 1n,
-            price: parseValue(1),
+            setupActions: [
+                new PlaceSellOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
+            ],
             expectedError: Unauthorized,
         };
 
     }).then(function*(properties) {
-        yield new PlaceSellOrderScenario(properties);
+        yield new BuyAtMarketScenario(properties);
     })
 ]);

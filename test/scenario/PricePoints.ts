@@ -2,7 +2,7 @@ import { MAX_UINT8 } from '@frugal-wizard/abi2ts-lib';
 import { AddContextFunction } from '@frugal-wizard/contract-test-helper';
 import { OperatorV1, PricePointsResultV1 } from '../../src/OperatorV1';
 import { Orders } from '../state/Orders';
-import { OperatorContext, OperatorScenario, OperatorScenarioProperties } from './OperatorScenario';
+import { OperatorContext, OperatorScenario, OperatorScenarioProperties } from './Operator';
 
 export interface PricePointsScenarioProperties extends OperatorScenarioProperties {
     readonly prevSellPrice?: bigint;

@@ -1,10 +1,10 @@
 import { formatValue, MAX_UINT32, Transaction } from '@frugal-wizard/abi2ts-lib';
 import { AddContextFunction } from '@frugal-wizard/contract-test-helper';
 import { ClaimOrderResultV1 } from '../../src/OperatorV1';
-import { ClaimOrderAction } from '../action/ClaimOrderAction';
+import { ClaimOrderAction } from '../action/ClaimOrder';
 import { Orders } from '../state/Orders';
 import { describeOrderType, OrderType } from '../state/OrderType';
-import { OperatorContext, OperatorScenario, OperatorScenarioProperties } from './OperatorScenario';
+import { OperatorContext, OperatorScenario, OperatorScenarioProperties } from './Operator';
 
 export interface ClaimOrderScenarioProperties extends OperatorScenarioProperties {
     readonly orderType: OrderType;

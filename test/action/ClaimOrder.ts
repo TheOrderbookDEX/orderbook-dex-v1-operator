@@ -1,8 +1,8 @@
 import { OrderType } from '../state/OrderType';
-import { OperatorAction, OperatorActionProperties } from './OperatorAction';
+import { OperatorAction, OperatorActionProperties } from './Operator';
 import { Orders } from '../state/Orders';
 import { decodeErrorData, MAX_UINT32 } from '@frugal-wizard/abi2ts-lib';
-import { OperatorContext } from '../scenario/OperatorScenario';
+import { OperatorContext } from '../scenario/Operator';
 import { OperatorV1 } from '../../src/OperatorV1';
 
 export interface ClaimOrderActionProperties extends OperatorActionProperties {

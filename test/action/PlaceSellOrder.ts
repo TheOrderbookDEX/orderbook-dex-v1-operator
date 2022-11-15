@@ -1,7 +1,7 @@
-import { OperatorAction, OperatorActionProperties } from './OperatorAction';
+import { OperatorAction, OperatorActionProperties } from './Operator';
 import { Orders } from '../state/Orders';
 import { Account } from '@frugal-wizard/contract-test-helper';
-import { OperatorContext } from '../scenario/OperatorScenario';
+import { OperatorContext } from '../scenario/Operator';
 import { decodeErrorData, MAX_UINT8 } from '@frugal-wizard/abi2ts-lib';
 import { OrderType } from '../state/OrderType';
 import { OperatorV1 } from '../../src/OperatorV1';

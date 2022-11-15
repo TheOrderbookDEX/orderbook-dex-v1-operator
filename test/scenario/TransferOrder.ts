@@ -3,7 +3,7 @@ import { Account, AddContextFunction } from '@frugal-wizard/contract-test-helper
 import { TransferOrderResultV1 } from '../../src/OperatorV1';
 import { Orders } from '../state/Orders';
 import { describeOrderType, OrderType } from '../state/OrderType';
-import { OperatorContext, OperatorScenario, OperatorScenarioProperties } from './OperatorScenario';
+import { OperatorContext, OperatorScenario, OperatorScenarioProperties } from './Operator';
 
 export interface TransferOrderScenarioProperties extends OperatorScenarioProperties {
     readonly orderType: OrderType;

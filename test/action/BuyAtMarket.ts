@@ -1,8 +1,8 @@
 import { OrderType } from '../state/OrderType';
 import { Orders } from '../state/Orders';
 import { MAX_UINT8, MAX_UINT256, decodeErrorData } from '@frugal-wizard/abi2ts-lib';
-import { OperatorAction, OperatorActionProperties } from './OperatorAction';
-import { OperatorContext } from '../scenario/OperatorScenario';
+import { OperatorAction, OperatorActionProperties } from './Operator';
+import { OperatorContext } from '../scenario/Operator';
 
 export interface BuyAtMarketActionProperties extends OperatorActionProperties {
     readonly maxAmount: bigint;

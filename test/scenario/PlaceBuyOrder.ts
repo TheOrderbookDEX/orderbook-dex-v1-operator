@@ -1,10 +1,10 @@
 import { formatValue, MAX_UINT8, Transaction } from '@frugal-wizard/abi2ts-lib';
 import { AddContextFunction } from '@frugal-wizard/contract-test-helper';
 import { PlaceBuyOrderResultV1 } from '../../src/OperatorV1';
-import { PlaceBuyOrderAction } from '../action/PlaceBuyOrderAction';
+import { PlaceBuyOrderAction } from '../action/PlaceBuyOrder';
 import { Orders } from '../state/Orders';
 import { OrderType } from '../state/OrderType';
-import { OperatorContext, OperatorScenario, OperatorScenarioProperties } from './OperatorScenario';
+import { OperatorContext, OperatorScenario, OperatorScenarioProperties } from './Operator';
 
 export interface PlaceBuyOrderScenarioProperties extends OperatorScenarioProperties {
     readonly maxAmount: bigint;

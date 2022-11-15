@@ -1,9 +1,9 @@
 import { formatValue, MAX_UINT32, Transaction } from '@frugal-wizard/abi2ts-lib';
 import { AddContextFunction } from '@frugal-wizard/contract-test-helper';
 import { CancelOrderResultV1 } from '../../src/OperatorV1';
-import { CancelOrderAction } from '../action/CancelOrderAction';
+import { CancelOrderAction } from '../action/CancelOrder';
 import { describeOrderType, OrderType } from '../state/OrderType';
-import { OperatorContext, OperatorScenario, OperatorScenarioProperties } from './OperatorScenario';
+import { OperatorContext, OperatorScenario, OperatorScenarioProperties } from './Operator';
 
 export interface CancelOrderScenarioProperties extends OperatorScenarioProperties {
     readonly orderType: OrderType;

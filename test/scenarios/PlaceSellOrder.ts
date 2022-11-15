@@ -1,16 +1,16 @@
 import { DefaultError, parseValue } from '@frugal-wizard/abi2ts-lib';
 import { Account, generatorChain, range } from '@frugal-wizard/contract-test-helper';
-import { InvalidAmount, InvalidArgument } from '@theorderbookdex/orderbook-dex-v1/dist/interfaces/IOrderbookV1';
+import { InvalidAmount, InvalidPrice } from '@theorderbookdex/orderbook-dex-v1/dist/interfaces/IOrderbookV1';
 import { Unauthorized } from '../../src/OperatorV1';
-import { PlaceSellOrderAction } from '../action/PlaceSellOrderAction';
+import { PlaceBuyOrderAction } from '../action/PlaceBuyOrder';
 import { EXHAUSTIVE } from '../config';
 import { describer } from '../describer/describer';
-import { BuyAtMarketScenario } from '../scenario/BuyAtMarketScenario';
+import { PlaceSellOrderScenario } from '../scenario/PlaceSellOrder';
 
-export const buyAtMarketScenarios: [string, Iterable<BuyAtMarketScenario>][] = [];
+export const placeSellOrderScenarios: [string, Iterable<PlaceSellOrderScenario>][] = [];
 
-buyAtMarketScenarios.push([
-    'buy at market',
+placeSellOrderScenarios.push([
+    'place sell order',
     generatorChain(function*() {
         yield {
             describer: describer.clone().configure({
@@ -38,7 +38,7 @@ buyAtMarketScenarios.push([
                 ...properties,
                 setupActions: [
                     ...setupActions,
-                    new PlaceSellOrderAction({ describer, price: parseValue(1), maxAmount })
+                    new PlaceBuyOrderAction({ describer, price: parseValue(1), maxAmount })
                 ],
             };
         }
@@ -52,7 +52,7 @@ buyAtMarketScenarios.push([
                 ...properties,
                 setupActions: [
                     ...setupActions,
-                    new PlaceSellOrderAction({ describer, price: parseValue(2), maxAmount })
+                    new PlaceBuyOrderAction({ describer, price: parseValue(2), maxAmount })
                 ],
             };
         }
@@ -66,18 +66,26 @@ buyAtMarketScenarios.push([
                 ...properties,
                 setupActions: [
                     ...setupActions,
-                    new PlaceSellOrderAction({ describer, price: parseValue(3), maxAmount })
+                    new PlaceBuyOrderAction({ describer, price: parseValue(3), maxAmount })
                 ],
             };
         }
 
     }).then(function*(properties) {
-        yield new BuyAtMarketScenario(properties);
+        for (const price of [...range(1, 3)].map(v => parseValue(v))) {
+            yield {
+                ...properties,
+                price,
+            };
+        }
+
+    }).then(function*(properties) {
+        yield new PlaceSellOrderScenario(properties);
     })
 ]);
 
-buyAtMarketScenarios.push([
-    'buy at market using maxPrice',
+placeSellOrderScenarios.push([
+    'place sell order using maxPricePoints',
     generatorChain(function*() {
         yield {
             describer: describer.clone().configure({
@@ -92,48 +100,12 @@ buyAtMarketScenarios.push([
         const { describer } = properties;
         yield {
             ...properties,
-            maxAmount: 3n,
+            maxAmount: 4n,
+            price: parseValue(1),
             setupActions: [
-                new PlaceSellOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
-                new PlaceSellOrderAction({ describer, price: parseValue(2), maxAmount: 1n }),
-                new PlaceSellOrderAction({ describer, price: parseValue(3), maxAmount: 1n }),
-            ],
-        }
-
-    }).then(function*(properties) {
-        for (const maxPrice of [...range(1, 3)].map(v => parseValue(v))) {
-            yield {
-                ...properties,
-                maxPrice,
-            };
-        }
-
-    }).then(function*(properties) {
-        yield new BuyAtMarketScenario(properties);
-    })
-]);
-
-buyAtMarketScenarios.push([
-    'buy at market using maxPricePoints',
-    generatorChain(function*() {
-        yield {
-            describer: describer.clone().configure({
-                hideOrderId: true,
-                hideContractSize: true,
-                hidePriceTick: true,
-                hideAmount: true,
-            }),
-        };
-
-    }).then(function*(properties) {
-        const { describer } = properties;
-        yield {
-            ...properties,
-            maxAmount: 3n,
-            setupActions: [
-                new PlaceSellOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
-                new PlaceSellOrderAction({ describer, price: parseValue(2), maxAmount: 1n }),
-                new PlaceSellOrderAction({ describer, price: parseValue(3), maxAmount: 1n }),
+                new PlaceBuyOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
+                new PlaceBuyOrderAction({ describer, price: parseValue(2), maxAmount: 1n }),
+                new PlaceBuyOrderAction({ describer, price: parseValue(3), maxAmount: 1n }),
             ],
         }
 
@@ -146,50 +118,67 @@ buyAtMarketScenarios.push([
         }
 
     }).then(function*(properties) {
-        yield new BuyAtMarketScenario(properties);
+        yield new PlaceSellOrderScenario(properties);
     })
 ]);
 
-buyAtMarketScenarios.push([
-    'buy at market with common errors',
+placeSellOrderScenarios.push([
+    'place sell order with common errors',
     generatorChain(function*() {
         yield {
-            describer: 'buy at market 0 contracts',
+            describer: 'place sell order of 0 contracts',
             maxAmount: 0n,
+            price: parseValue(1),
+            expectedErrorInResult: new InvalidAmount(),
+        };
+        yield {
+            describer: 'place sell order of 0 contracts (on bid price)',
+            maxAmount: 0n,
+            price: parseValue(1),
             setupActions: [
-                new PlaceSellOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
+                new PlaceBuyOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
             ],
             expectedErrorInResult: new InvalidAmount(),
         };
         yield {
-            describer: 'buy at market without funds',
+            describer: 'place sell order without funds',
             maxAmount: 1n,
-            baseTokenBalance: 0n,
+            price: parseValue(1),
+            tradedTokenBalance: 0n,
+            expectedErrorInResult: new DefaultError('ERC20: transfer amount exceeds balance'),
+        };
+        yield {
+            describer: 'place sell order without funds (on bid price)',
+            maxAmount: 1n,
+            price: parseValue(1),
+            tradedTokenBalance: 0n,
             setupActions: [
-                new PlaceSellOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
+                new PlaceBuyOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
             ],
             expectedErrorInResult: new DefaultError('ERC20: transfer amount exceeds balance'),
         };
         yield {
-            describer: 'buy at market using maxPricePoints 0',
+            describer: 'place sell order at price 0',
             maxAmount: 1n,
-            maxPricePoints: 0,
-            setupActions: [
-                new PlaceSellOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
-            ],
-            expectedErrorInResult: new InvalidArgument(),
+            price: parseValue(0),
+            expectedErrorInResult: new InvalidPrice(),
         };
         yield {
-            describer: 'buy at market using account that is not the operator owner',
+            describer: 'place sell order at price not divisible by price tick',
+            maxAmount: 1n,
+            price: parseValue(1),
+            priceTick: parseValue(10),
+            expectedErrorInResult: new InvalidPrice(),
+        };
+        yield {
+            describer: 'place sell order using account that is not the operator owner',
             caller: Account.SECOND,
             maxAmount: 1n,
-            setupActions: [
-                new PlaceSellOrderAction({ describer, price: parseValue(1), maxAmount: 1n }),
-            ],
+            price: parseValue(1),
             expectedError: Unauthorized,
         };
 
     }).then(function*(properties) {
-        yield new BuyAtMarketScenario(properties);
+        yield new PlaceSellOrderScenario(properties);
     })
 ]);

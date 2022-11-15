@@ -1,14 +1,14 @@
 import { parseValue } from '@frugal-wizard/abi2ts-lib';
 import { Account, applySetupActions, generatorChain, range, repeat } from '@frugal-wizard/contract-test-helper';
 import { InvalidOrderId, Unauthorized, InvalidAmount, InvalidPrice, OrderDeleted } from '@theorderbookdex/orderbook-dex-v1/dist/interfaces/IOrderbookV1';
-import { BuyAtMarketAction } from '../action/BuyAtMarketAction';
-import { CancelOrderAction } from '../action/CancelOrderAction';
-import { ClaimOrderAction } from '../action/ClaimOrderAction';
-import { PlaceBuyOrderAction } from '../action/PlaceBuyOrderAction';
-import { PlaceSellOrderAction } from '../action/PlaceSellOrderAction';
-import { SellAtMarketAction } from '../action/SellAtMarketAction';
+import { BuyAtMarketAction } from '../action/BuyAtMarket';
+import { CancelOrderAction } from '../action/CancelOrder';
+import { ClaimOrderAction } from '../action/ClaimOrder';
+import { PlaceBuyOrderAction } from '../action/PlaceBuyOrder';
+import { PlaceSellOrderAction } from '../action/PlaceSellOrder';
+import { SellAtMarketAction } from '../action/SellAtMarket';
 import { describer } from '../describer/describer';
-import { ClaimOrderScenario } from '../scenario/ClaimOrderScenario';
+import { ClaimOrderScenario } from '../scenario/ClaimOrder';
 import { Orders } from '../state/Orders';
 import { describeOrderType, OrderType } from '../state/OrderType';
 
