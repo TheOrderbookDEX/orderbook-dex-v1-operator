@@ -11,6 +11,7 @@ import { CancelOrderScenario } from '../scenario/CancelOrderScenario';
 import { ClaimOrderScenario } from '../scenario/ClaimOrderScenario';
 import { PlaceBuyOrderScenario } from '../scenario/PlaceBuyOrderScenario';
 import { PlaceSellOrderScenario } from '../scenario/PlaceSellOrderScenario';
+import { PricePointsScenario } from '../scenario/PricePoints';
 import { SellAtMarketScenario } from '../scenario/SellAtMarketScenario';
 import { TransferOrderScenario } from '../scenario/TransferOrderScenario';
 import { describeOrderType, OrderType } from '../state/OrderType';
@@ -22,12 +23,15 @@ export interface OrderbookTestDescriberConfig {
     readonly hidePrice?: boolean;
     readonly hideOrderId?: boolean;
     readonly hideAmount?: boolean;
+    readonly hideSetup?: boolean;
 }
 
 export const describer = new ConfigurableDescriber<OrderbookTestDescriberConfig>();
 
-function describeSetup(description: string[], scenario: { setupActions: readonly { description: string }[] }) {
+function describeSetup(description: string[], scenario: { setupActions: readonly { description: string }[] }, config: { hideSetup?: boolean }) {
     const { setupActions } = scenario;
+    const { hideSetup } = config;
+    if (hideSetup) return;
     for (const [ index, action ] of setupActions.entries()) {
         description.push(index == 0 ? 'after' : 'and');
         description.push(action.description);
@@ -176,7 +180,7 @@ describer.addDescriber(BuyAtMarketScenario, (scenario, config = {}) => {
     describeMaxPrice(description, scenario, config);
     describeMaxPricePoints(description, scenario);
     describeCaller(description, scenario);
-    describeSetup(description, scenario);
+    describeSetup(description, scenario, config);
     describeScenario(description, scenario, config);
     return description.join(' ');
 });
@@ -187,7 +191,7 @@ describer.addDescriber(SellAtMarketScenario, (scenario, config = {}) => {
     describeMinPrice(description, scenario, config);
     describeMaxPricePoints(description, scenario);
     describeCaller(description, scenario);
-    describeSetup(description, scenario);
+    describeSetup(description, scenario, config);
     describeScenario(description, scenario, config);
     return description.join(' ');
 });
@@ -198,7 +202,7 @@ describer.addDescriber(PlaceBuyOrderScenario, (scenario, config = {}) => {
     describePriceLimit(description, scenario, config);
     describeMaxPricePoints(description, scenario);
     describeCaller(description, scenario);
-    describeSetup(description, scenario);
+    describeSetup(description, scenario, config);
     describeScenario(description, scenario, config);
     return description.join(' ');
 });
@@ -209,7 +213,7 @@ describer.addDescriber(PlaceSellOrderScenario, (scenario, config = {}) => {
     describePriceLimit(description, scenario, config);
     describeMaxPricePoints(description, scenario);
     describeCaller(description, scenario);
-    describeSetup(description, scenario);
+    describeSetup(description, scenario, config);
     describeScenario(description, scenario, config);
     return description.join(' ');
 });
@@ -220,7 +224,7 @@ describer.addDescriber(ClaimOrderScenario, (scenario, config = {}) => {
     description.push('from');
     describeOrder(description, scenario, config);
     describeCaller(description, scenario);
-    describeSetup(description, scenario);
+    describeSetup(description, scenario, config);
     describeScenario(description, scenario, config);
     return description.join(' ');
 });
@@ -230,7 +234,7 @@ describer.addDescriber(TransferOrderScenario, (scenario, config = {}) => {
     describeOrder(description, scenario, config);
     description.push(`to ${scenario.recipient}`);
     describeCaller(description, scenario);
-    describeSetup(description, scenario);
+    describeSetup(description, scenario, config);
     describeScenario(description, scenario, config);
     return description.join(' ');
 });
@@ -239,7 +243,33 @@ describer.addDescriber(CancelOrderScenario, (scenario, config = {}) => {
     const description = ['cancel'];
     describeOrder(description, scenario, config);
     describeCaller(description, scenario);
-    describeSetup(description, scenario);
+    describeSetup(description, scenario, config);
+    describeScenario(description, scenario, config);
+    return description.join(' ');
+});
+
+describer.addDescriber(PricePointsScenario, (scenario, config = {}) => {
+    const description = ['get price points'];
+    const { prevSellPrice, sellPricesLimit, prevBuyPrice, buyPricesLimit, useOperatorImplementation } = scenario;
+    if (useOperatorImplementation) {
+        description.push('using operator implementation');
+    }
+    if (prevSellPrice || prevBuyPrice) {
+        description.push('after');
+        description.push([
+            ...prevSellPrice ? [`sell at ${formatValue(prevSellPrice)}`] : [],
+            ...prevBuyPrice ? [`buy at ${formatValue(prevBuyPrice)}`] : [],
+        ].join(' and '));
+    }
+    if (sellPricesLimit < MAX_UINT8 || buyPricesLimit < MAX_UINT8) {
+        description.push('limited to');
+        description.push([
+            ...sellPricesLimit < MAX_UINT8 ? [`${sellPricesLimit} sell prices`] : [],
+            ...buyPricesLimit < MAX_UINT8 ? [`${buyPricesLimit} buy prices`] : [],
+        ].join(' and '));
+    }
+    describeCaller(description, scenario);
+    describeSetup(description, scenario, config);
     describeScenario(description, scenario, config);
     return description.join(' ');
 });

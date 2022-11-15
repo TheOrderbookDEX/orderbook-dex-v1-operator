@@ -10,11 +10,15 @@ import { OperatorLimitOrderV1 }
     from "./OperatorLimitOrderV1.sol";
 import { OperatorOrderHandlingV1 }
     from "./OperatorOrderHandlingV1.sol";
+import { OperatorPricePointsV1 }
+    from "./OperatorPricePointsV1.sol";
 import { IOperatorV1 }
     from "./interfaces/IOperatorV1.sol";
 
 /**
  * Operator V1 functionality.
  */
-contract OperatorV1 is OperatorV0, OperatorMarketTradeV1, OperatorLimitOrderV1, OperatorOrderHandlingV1, IOperatorV1 {
+contract OperatorV1 is OperatorV0, OperatorMarketTradeV1, OperatorLimitOrderV1, OperatorOrderHandlingV1,
+    OperatorPricePointsV1, IOperatorV1
+{
 }
