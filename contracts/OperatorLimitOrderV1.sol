@@ -45,13 +45,14 @@ contract OperatorLimitOrderV1 is OperatorBase, IOperatorLimitOrderV1 {
 
         } else {
             try orderbook.fill(OrderType.SELL, uint64(maxAmount), price, maxPricePoints)
-                returns (uint64 amountBought, uint256 amountPaid)
+                returns (uint64 amountBought, uint256 amountPaid, uint256 fee)
             {
                 result.amountBought = amountBought;
                 result.amountPaid = amountPaid;
+                result.fee = fee;
 
                 if (amountBought > 0) {
-                    emit BoughtAtMarketV1(amountBought, amountPaid);
+                    emit BoughtAtMarketV1(amountBought, amountPaid, fee);
                     maxAmount -= amountBought;
                 }
 
@@ -122,13 +123,14 @@ contract OperatorLimitOrderV1 is OperatorBase, IOperatorLimitOrderV1 {
 
         } else {
             try orderbook.fill(OrderType.BUY, uint64(maxAmount), price, maxPricePoints)
-                returns (uint64 amountSold, uint256 amountReceived)
+                returns (uint64 amountSold, uint256 amountReceived, uint256 fee)
             {
                 result.amountSold = amountSold;
                 result.amountReceived = amountReceived;
+                result.fee = fee;
 
                 if (amountSold > 0) {
-                    emit SoldAtMarketV1(amountSold, amountReceived);
+                    emit SoldAtMarketV1(amountSold, amountReceived, fee);
                     maxAmount -= amountSold;
                 }
 

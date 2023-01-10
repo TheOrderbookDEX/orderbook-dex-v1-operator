@@ -9,6 +9,8 @@ chai.use(chaiAsPromised);
 
 DefaultOverrides.gasLimit = 5000000;
 
+// TODO test fees
+
 describe('ClaimOrder', () => {
     for (const [ description, scenarios ] of claimOrderScenarios) {
         describe(description, () => {

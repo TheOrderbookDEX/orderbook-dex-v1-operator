@@ -91,6 +91,14 @@ struct PlaceBuyOrderResultV1 {
     uint256 amountPaid;
 
     /**
+     * The amount of traded token taken as fee.
+     *
+     * This might be non zero even if the operation fails, which means it managed to buy some
+     * before failing.
+     */
+    uint256 fee;
+
+    /**
      * The amount of contracts of the placed order.
      */
     uint256 amountPlaced;
@@ -130,6 +138,14 @@ struct PlaceSellOrderResultV1 {
      * before failing.
      */
     uint256 amountReceived;
+
+    /**
+     * The amount of base token taken as fee.
+     *
+     * This might be non zero even if the operation fails, which means it managed to buy some
+     * before failing.
+     */
+    uint256 fee;
 
     /**
      * The amount of contracts of the placed order.

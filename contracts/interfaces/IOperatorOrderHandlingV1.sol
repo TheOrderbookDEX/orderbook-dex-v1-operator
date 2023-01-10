@@ -15,8 +15,9 @@ interface IOperatorOrderHandlingV1 is IOperatorBase {
      * Event emitted to provide feedback after a claimOrder call.
      *
      * @param amount the amount of contracts claimed
+     * @param fee    the amount of tokens taken as fee
      */
-    event OrderClaimedV1(uint256 amount);
+    event OrderClaimedV1(uint256 amount, uint256 fee);
 
     /**
      * Event emitted to provide feedback after a transferOrder call.
@@ -90,6 +91,11 @@ struct ClaimOrderResultV1 {
      * The amount of contracts claimed.
      */
     uint256 amountClaimed;
+
+    /**
+     * The amount of tokens taken as fee.
+     */
+    uint256 fee;
 
     /**
      * True if the operation failed.

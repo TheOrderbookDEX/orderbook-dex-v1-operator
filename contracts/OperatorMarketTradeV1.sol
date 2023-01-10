@@ -30,13 +30,14 @@ contract OperatorMarketTradeV1 is OperatorBase, IOperatorMarketTradeV1 {
         }
 
         try IOrderbookV1(orderbook).fill(OrderType.SELL, uint64(maxAmount), maxPrice, maxPricePoints)
-            returns (uint64 amountBought, uint256 amountPaid)
+            returns (uint64 amountBought, uint256 amountPaid, uint256 fee)
         {
             result.amountBought = amountBought;
             result.amountPaid = amountPaid;
+            result.fee = fee;
 
             if (amountBought > 0) {
-                emit BoughtAtMarketV1(amountBought, amountPaid);
+                emit BoughtAtMarketV1(amountBought, amountPaid, fee);
             }
 
         } catch (bytes memory error) {
@@ -61,13 +62,14 @@ contract OperatorMarketTradeV1 is OperatorBase, IOperatorMarketTradeV1 {
         tradedToken.approve(address(orderbook), maxAmount * orderbook.contractSize());
 
         try orderbook.fill(OrderType.BUY, uint64(maxAmount), minPrice, maxPricePoints)
-            returns (uint64 amountSold, uint256 amountReceived)
+            returns (uint64 amountSold, uint256 amountReceived, uint256 fee)
         {
             result.amountSold = amountSold;
             result.amountReceived = amountReceived;
+            result.fee = fee;
 
             if (amountSold > 0) {
-                emit SoldAtMarketV1(amountSold, amountReceived);
+                emit SoldAtMarketV1(amountSold, amountReceived, fee);
             }
 
         } catch (bytes memory error) {

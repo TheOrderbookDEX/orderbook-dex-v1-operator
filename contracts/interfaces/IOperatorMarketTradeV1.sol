@@ -59,6 +59,11 @@ struct BuyAtMarketResultV1 {
     uint256 amountPaid;
 
     /**
+     * The amount of traded token taken as fee.
+     */
+    uint256 fee;
+
+    /**
      * True if the operation failed.
      */
     bool failed;
@@ -79,9 +84,14 @@ struct SellAtMarketResultV1 {
     uint256 amountSold;
 
     /**
-     * The amount of traded token received.
+     * The amount of base token received.
      */
     uint256 amountReceived;
+
+    /**
+     * The amount of base token taken as fee.
+     */
+    uint256 fee;
 
     /**
      * True if the operation failed.

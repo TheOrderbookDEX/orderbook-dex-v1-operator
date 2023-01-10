@@ -17,10 +17,11 @@ contract OperatorOrderHandlingV1 is OperatorBase, IOperatorOrderHandlingV1 {
         IOrderbookV1 orderbook, OrderType orderType, uint256 price, uint32 orderId, uint32 maxAmount
     ) external onlyOwner returns (ClaimOrderResultV1 memory result) {
         try orderbook.claimOrder(orderType, price, orderId, maxAmount)
-            returns (uint32 amountClaimed)
+            returns (uint32 amountClaimed, uint256 fee)
         {
             result.amountClaimed = amountClaimed;
-            emit OrderClaimedV1(amountClaimed);
+            result.fee = fee;
+            emit OrderClaimedV1(amountClaimed, fee);
 
         } catch (bytes memory error) {
             result.failed = true;
