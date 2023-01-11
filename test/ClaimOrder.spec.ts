@@ -9,8 +9,6 @@ chai.use(chaiAsPromised);
 
 DefaultOverrides.gasLimit = 5000000;
 
-// TODO test fees
-
 describe('ClaimOrder', () => {
     for (const [ description, scenarios ] of claimOrderScenarios) {
         describe(description, () => {
@@ -71,6 +69,11 @@ describe('ClaimOrder', () => {
                                 .to.be.equal(scenario.amountClaimed);
                         });
 
+                        it('should return collected fee', async (test) => {
+                            expect((await test.executeStatic()).fee)
+                                .to.be.equal(scenario.collectedFee);
+                        });
+
                         it('should not mark result as failed', async (test) => {
                             expect((await test.executeStatic()).failed)
                                 .to.be.false;
@@ -82,6 +85,8 @@ describe('ClaimOrder', () => {
                                 expect(events.length).to.be.equal(1);
                                 expect(events[0].amount)
                                     .to.be.equal(scenario.amountClaimed);
+                                expect(events[0].fee)
+                                    .to.be.equal(scenario.collectedFee);
                             });
                         }
 
@@ -108,20 +113,20 @@ describe('ClaimOrder', () => {
 
                         it(`should take the corresponding ${scenario.givenToken} from orderbook`, async (test) => {
                             const { [scenario.givenToken]: givenToken, orderbook } = test;
-                            const { givenAmount } = scenario;
+                            const { givenAmount, collectedFee } = scenario;
                             const prevBalance = await givenToken.balanceOf(orderbook);
                             await test.execute();
                             expect(await givenToken.balanceOf(orderbook))
-                                .to.be.equal(prevBalance - givenAmount);
+                                .to.be.equal(prevBalance - (givenAmount - collectedFee));
                         });
 
                         it(`should give the corresponding ${scenario.givenToken} to operator`, async (test) => {
                             const { [scenario.givenToken]: givenToken, operator } = test;
-                            const { givenAmount } = scenario;
+                            const { givenAmount, collectedFee } = scenario;
                             const prevBalance = await givenToken.balanceOf(operator);
                             await test.execute();
                             expect(await givenToken.balanceOf(operator))
-                                .to.be.equal(prevBalance + givenAmount);
+                                .to.be.equal(prevBalance + (givenAmount - collectedFee));
                         });
                     }
                 });

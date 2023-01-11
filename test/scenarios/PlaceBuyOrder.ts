@@ -22,6 +22,14 @@ placeBuyOrderScenarios.push([
         };
 
     }).then(function*(properties) {
+        for (const fee of [ 0n, parseValue('0.0001') ]) {
+            yield {
+                ...properties,
+                fee,
+            };
+        }
+
+    }).then(function*(properties) {
         for (const maxAmount of range(1n, EXHAUSTIVE ? 6n : 3n)) {
             yield {
                 ...properties,

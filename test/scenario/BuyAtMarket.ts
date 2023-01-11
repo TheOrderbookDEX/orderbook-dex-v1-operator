@@ -1,4 +1,4 @@
-import { formatValue, MAX_UINT256, MAX_UINT8, Transaction } from '@frugal-wizard/abi2ts-lib';
+import { formatValue, MAX_UINT256, MAX_UINT8, parseValue, Transaction } from '@frugal-wizard/abi2ts-lib';
 import { AddContextFunction } from '@frugal-wizard/contract-test-helper';
 import { BuyAtMarketResultV1 } from '../../src/OperatorV1';
 import { BuyAtMarketAction } from '../action/BuyAtMarket';
@@ -71,5 +71,9 @@ export class BuyAtMarketScenario extends OperatorScenario<Transaction, BuyAtMark
             }
         }
         return amountPaid;
+    }
+
+    get collectedFee() {
+        return this.amountBought * this.contractSize * this.fee / parseValue(1);
     }
 }

@@ -1,4 +1,4 @@
-import { formatValue, MAX_UINT8, Transaction } from '@frugal-wizard/abi2ts-lib';
+import { formatValue, MAX_UINT8, parseValue, Transaction } from '@frugal-wizard/abi2ts-lib';
 import { AddContextFunction } from '@frugal-wizard/contract-test-helper';
 import { PlaceSellOrderResultV1 } from '../../src/OperatorV1';
 import { PlaceSellOrderAction } from '../action/PlaceSellOrder';
@@ -74,6 +74,10 @@ export class PlaceSellOrderScenario extends OperatorScenario<Transaction, PlaceS
     get amountPlaced() {
         return this.ordersAfter.available(OrderType.SELL, this.price)
             - this.ordersBefore.available(OrderType.SELL, this.price);
+    }
+
+    get collectedFee() {
+        return this.amountReceived * this.fee / parseValue(1);
     }
 
     get orderId() {

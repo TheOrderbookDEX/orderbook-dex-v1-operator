@@ -33,6 +33,14 @@ for (const orderType of [ OrderType.SELL, OrderType.BUY ]) {
             };
 
         }).then(function*(properties) {
+            for (const fee of [ 0n, parseValue('0.0001') ]) {
+                yield {
+                    ...properties,
+                    fee,
+                };
+            }
+
+        }).then(function*(properties) {
             const { describer, price, setupActions } = properties;
             yield {
                 ...properties,

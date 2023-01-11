@@ -1,4 +1,4 @@
-import { formatValue, MAX_UINT32, Transaction } from '@frugal-wizard/abi2ts-lib';
+import { formatValue, MAX_UINT32, parseValue, Transaction } from '@frugal-wizard/abi2ts-lib';
 import { AddContextFunction } from '@frugal-wizard/contract-test-helper';
 import { ClaimOrderResultV1 } from '../../src/OperatorV1';
 import { ClaimOrderAction } from '../action/ClaimOrder';
@@ -80,5 +80,9 @@ export class ClaimOrderScenario extends OperatorScenario<Transaction, ClaimOrder
             case OrderType.BUY:
                 return this.amountClaimed * this.contractSize;
         }
+    }
+
+    get collectedFee() {
+        return this.givenAmount * this.fee / parseValue(1);
     }
 }

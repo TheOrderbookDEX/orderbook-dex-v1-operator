@@ -112,20 +112,26 @@ function describeOrder(description: string[], scenario: { orderType: OrderType, 
     }
 }
 
-function describeScenario(description: string[], scenario: { contractSize: bigint, priceTick: bigint }, config: { hideContractSize?: boolean, hidePriceTick?: boolean }) {
-    const { contractSize, priceTick } = scenario;
+function describeScenario(
+    description: string[],
+    scenario: { fee: bigint, contractSize: bigint, priceTick: bigint },
+    config: { hideContractSize?: boolean, hidePriceTick?: boolean }
+) {
+    const { fee, contractSize, priceTick } = scenario;
     const { hideContractSize, hidePriceTick } = config;
-    if (!hideContractSize || !hidePriceTick) {
-        description.push('with');
+    const settings = [];
+    if (fee) {
+        settings.push(`fee at ${formatValue(fee)}`);
     }
     if (!hideContractSize) {
-        description.push(`contract size at ${formatValue(contractSize)}`);
-    }
-    if (!hideContractSize && !hidePriceTick) {
-        description.push('and');
+        settings.push(`contract size at ${formatValue(contractSize)}`);
     }
     if (!hidePriceTick) {
-        description.push(`price tick at ${formatValue(priceTick)}`);
+        settings.push(`price tick at ${formatValue(priceTick)}`);
+    }
+    if (settings.length) {
+        description.push('with');
+        description.push(settings.join(' and '));
     }
 }
 
