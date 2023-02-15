@@ -1,4 +1,5 @@
 import { formatValue, MAX_UINT8 } from '@frugal-wizard/abi2ts-lib';
+import { describeCaller } from './caller';
 import { describeOperatorScenario } from './operator';
 import { describeSetup } from './setup';
 
@@ -16,6 +17,7 @@ export function describePricePointsScenario({
     readonly buyPricesLimit: number;
     readonly useOperatorImplementation: boolean;
 } & (
+    Parameters<typeof describeCaller>[0] &
     Parameters<typeof describeSetup>[0] &
     Parameters<typeof describeOperatorScenario>[0]
 )): string {
@@ -32,6 +34,8 @@ export function describePricePointsScenario({
             ...sellPricesLimit != MAX_UINT8 ? [`${sellPricesLimit} sell prices`] : [],
             ...buyPricesLimit != MAX_UINT8 ? [`${buyPricesLimit} buy prices`] : [],
         ].join(' and ')}` : ''
+    }${
+        describeCaller(rest)
     }${
         describeSetup(rest)
     }${

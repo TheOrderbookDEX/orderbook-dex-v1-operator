@@ -1,5 +1,5 @@
 import { MAX_UINT8 } from '@frugal-wizard/abi2ts-lib';
-import { EthereumSetupContext, executeSetupActions, TestSetupContext } from '@frugal-wizard/contract-test-helper';
+import { Account, EthereumSetupContext, executeSetupActions, TestSetupContext } from '@frugal-wizard/contract-test-helper';
 import { OperatorV1, PricePointsResultV1 } from '../../src/OperatorV1';
 import { OperatorAction } from '../action/operator';
 import { describePricePointsScenario } from '../describe/pricePoints';
@@ -23,6 +23,7 @@ export function createPricePointsScenario({
     prevBuyPrice = 0n,
     buyPricesLimit = MAX_UINT8,
     useOperatorImplementation = false,
+    caller = Account.MAIN,
     tradedTokenBalance = DEFAULT_BALANCE,
     baseTokenBalance = DEFAULT_BALANCE,
     fee = DEFAULT_FEE,
@@ -40,6 +41,7 @@ export function createPricePointsScenario({
     readonly prevBuyPrice?: bigint;
     readonly buyPricesLimit?: number;
     readonly useOperatorImplementation?: boolean;
+    readonly caller?: Account;
     readonly tradedTokenBalance?: bigint;
     readonly baseTokenBalance?: bigint;
     readonly fee?: bigint;
@@ -67,6 +69,7 @@ export function createPricePointsScenario({
                 prevBuyPrice,
                 buyPricesLimit,
                 useOperatorImplementation,
+                caller,
                 fee,
                 contractSize,
                 priceTick,
@@ -87,6 +90,7 @@ export function createPricePointsScenario({
                 ctx.addContext('prevBuyPrice', prevBuyPrice);
                 ctx.addContext('buyPricesLimit', buyPricesLimit == MAX_UINT8 ? 'MAX' : buyPricesLimit);
                 ctx.addContext('useOperatorImplementation', useOperatorImplementation);
+                ctx.addContext('caller', caller);
 
                 await executeSetupActions(setupActions, ctx);
 
@@ -95,7 +99,7 @@ export function createPricePointsScenario({
                 return {
                     ...ctx,
                     operator,
-                    execute: () => ctx.operator.pricePointsV1(ctx.orderbook, prevSellPrice, sellPricesLimit, prevBuyPrice, buyPricesLimit),
+                    execute: () => ctx.operator.pricePointsV1(ctx.orderbook, prevSellPrice, sellPricesLimit, prevBuyPrice, buyPricesLimit, { from: ctx[caller] }),
                 };
             },
         }),
