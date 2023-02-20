@@ -1,6 +1,6 @@
-import { parseValue } from '@frugal-wizard/abi2ts-lib';
-import { NotRegistered } from '@frugal-wizard/addressbook/dist/utils/AddressBookUtil';
-import { Account, generatorChain } from '@frugal-wizard/contract-test-helper';
+import { parseValue } from '@frugalwizard/abi2ts-lib';
+import { NotRegistered } from '@frugalwizard/addressbook/dist/utils/AddressBookUtil';
+import { Account, generatorChain } from '@frugalwizard/contract-test-helper';
 import { InvalidOrderId, InvalidPrice, OrderDeleted, Unauthorized } from '@theorderbookdex/orderbook-dex-v1/dist/interfaces/IOrderbookV1';
 import { createBuyAtMarketAction } from '../action/buyAtMarket';
 import { createCancelOrderAction } from '../action/cancelOrder';

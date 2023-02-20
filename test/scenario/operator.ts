@@ -1,6 +1,6 @@
-import { formatValue, parseValue } from '@frugal-wizard/abi2ts-lib';
-import { AddressBook } from '@frugal-wizard/addressbook/dist/AddressBook';
-import { createEthereumScenario, EthereumScenario, EthereumSetupContext, TestSetupContext } from '@frugal-wizard/contract-test-helper';
+import { formatValue, parseValue } from '@frugalwizard/abi2ts-lib';
+import { AddressBook } from '@frugalwizard/addressbook/dist/AddressBook';
+import { createEthereumScenario, EthereumScenario, EthereumSetupContext, TestSetupContext } from '@frugalwizard/contract-test-helper';
 import { OperatorFactory } from '@theorderbookdex/orderbook-dex-operator/dist/OperatorFactory';
 import { OperatorV1 } from '../../src/OperatorV1';
 import { ERC20Mock } from '@theorderbookdex/orderbook-dex/dist/testing/ERC20Mock';

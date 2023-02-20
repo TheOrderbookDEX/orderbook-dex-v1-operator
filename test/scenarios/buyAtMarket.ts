@@ -1,5 +1,5 @@
-import { DefaultError, parseValue } from '@frugal-wizard/abi2ts-lib';
-import { Account, generatorChain, range } from '@frugal-wizard/contract-test-helper';
+import { DefaultError, parseValue } from '@frugalwizard/abi2ts-lib';
+import { Account, generatorChain, range } from '@frugalwizard/contract-test-helper';
 import { InvalidAmount, InvalidArgument } from '@theorderbookdex/orderbook-dex-v1/dist/interfaces/IOrderbookV1';
 import { Unauthorized } from '../../src/OperatorV1';
 import { createPlaceSellOrderAction } from '../action/placeSellOrder';

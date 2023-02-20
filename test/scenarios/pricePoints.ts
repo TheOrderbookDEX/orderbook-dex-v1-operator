@@ -1,5 +1,5 @@
-import { parseValue } from '@frugal-wizard/abi2ts-lib';
-import { Account, generatorChain, range } from '@frugal-wizard/contract-test-helper';
+import { parseValue } from '@frugalwizard/abi2ts-lib';
+import { Account, generatorChain, range } from '@frugalwizard/contract-test-helper';
 import { createPlaceBuyOrderAction } from '../action/placeBuyOrder';
 import { createPlaceSellOrderAction } from '../action/placeSellOrder';
 import { createPricePointsScenario } from '../scenario/pricePoints';

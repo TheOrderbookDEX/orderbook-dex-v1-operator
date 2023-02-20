@@ -1,5 +1,5 @@
-import { parseValue } from '@frugal-wizard/abi2ts-lib';
-import { Account, generatorChain, range, repeat } from '@frugal-wizard/contract-test-helper';
+import { parseValue } from '@frugalwizard/abi2ts-lib';
+import { Account, generatorChain, range, repeat } from '@frugalwizard/contract-test-helper';
 import { AlreadyFilled, InvalidOrderId, OverMaxLastOrderId, Unauthorized, InvalidPrice, OrderDeleted } from '@theorderbookdex/orderbook-dex-v1/dist/interfaces/IOrderbookV1';
 import { createBuyAtMarketAction } from '../action/buyAtMarket';
 import { createCancelOrderAction } from '../action/cancelOrder';

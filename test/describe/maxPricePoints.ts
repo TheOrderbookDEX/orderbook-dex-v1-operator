@@ -1,4 +1,4 @@
-import { MAX_UINT8 } from '@frugal-wizard/abi2ts-lib';
+import { MAX_UINT8 } from '@frugalwizard/abi2ts-lib';
 
 export function describeMaxPricePoints({
     maxPricePoints

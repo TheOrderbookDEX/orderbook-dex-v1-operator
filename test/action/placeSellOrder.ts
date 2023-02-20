@@ -1,6 +1,6 @@
 import { OperatorAction } from './operator';
-import { Account } from '@frugal-wizard/contract-test-helper';
-import { decodeErrorData, MAX_UINT8 } from '@frugal-wizard/abi2ts-lib';
+import { Account } from '@frugalwizard/contract-test-helper';
+import { decodeErrorData, MAX_UINT8 } from '@frugalwizard/abi2ts-lib';
 import { OrderType } from '../state/OrderType';
 import { OperatorV1 } from '../../src/OperatorV1';
 import { describePlaceSellOrderAction } from '../describe/placeSellOrder';

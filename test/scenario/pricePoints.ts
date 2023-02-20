@@ -1,5 +1,5 @@
-import { MAX_UINT8 } from '@frugal-wizard/abi2ts-lib';
-import { Account, EthereumSetupContext, executeSetupActions, TestSetupContext } from '@frugal-wizard/contract-test-helper';
+import { MAX_UINT8 } from '@frugalwizard/abi2ts-lib';
+import { Account, EthereumSetupContext, executeSetupActions, TestSetupContext } from '@frugalwizard/contract-test-helper';
 import { OperatorV1, PricePointsResultV1 } from '../../src/OperatorV1';
 import { OperatorAction } from '../action/operator';
 import { describePricePointsScenario } from '../describe/pricePoints';

@@ -1,5 +1,5 @@
-import { ContractError, formatValue, MAX_UINT32, parseValue, Transaction } from '@frugal-wizard/abi2ts-lib';
-import { Account, EthereumSetupContext, executeSetupActions, TestSetupContext } from '@frugal-wizard/contract-test-helper';
+import { ContractError, formatValue, MAX_UINT32, parseValue, Transaction } from '@frugalwizard/abi2ts-lib';
+import { Account, EthereumSetupContext, executeSetupActions, TestSetupContext } from '@frugalwizard/contract-test-helper';
 import { ClaimOrderResultV1 } from '../../src/OperatorV1';
 import { createClaimOrderAction } from '../action/claimOrder';
 import { OperatorAction } from '../action/operator';

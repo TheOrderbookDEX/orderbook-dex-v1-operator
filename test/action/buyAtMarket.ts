@@ -1,5 +1,5 @@
 import { OrderType } from '../state/OrderType';
-import { MAX_UINT8, MAX_UINT256, decodeErrorData } from '@frugal-wizard/abi2ts-lib';
+import { MAX_UINT8, MAX_UINT256, decodeErrorData } from '@frugalwizard/abi2ts-lib';
 import { OperatorAction } from './operator';
 import { describeBuyAtMarketAction } from '../describe/buyAtMarket';
 

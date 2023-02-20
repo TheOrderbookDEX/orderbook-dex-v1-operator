@@ -1,4 +1,4 @@
-import { formatValue, MAX_UINT8 } from '@frugal-wizard/abi2ts-lib';
+import { formatValue, MAX_UINT8 } from '@frugalwizard/abi2ts-lib';
 import { describeCaller } from './caller';
 import { describeOperatorScenario } from './operator';
 import { describeSetup } from './setup';

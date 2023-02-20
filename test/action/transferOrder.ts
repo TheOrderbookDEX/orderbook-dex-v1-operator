@@ -1,9 +1,9 @@
 import { OrderType } from '../state/OrderType';
 import { OperatorAction } from './operator';
-import { decodeErrorData } from '@frugal-wizard/abi2ts-lib';
+import { decodeErrorData } from '@frugalwizard/abi2ts-lib';
 import { OperatorV1 } from '../../src/OperatorV1';
 import { describeTransferOrderAction } from '../describe/transferOrder';
-import { Account } from '@frugal-wizard/contract-test-helper';
+import { Account } from '@frugalwizard/contract-test-helper';
 
 export function createTransferOrderAction({
     orderType,

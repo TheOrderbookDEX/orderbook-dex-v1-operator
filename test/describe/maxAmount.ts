@@ -1,4 +1,4 @@
-import { MAX_UINT32 } from '@frugal-wizard/abi2ts-lib';
+import { MAX_UINT32 } from '@frugalwizard/abi2ts-lib';
 
 export function describeMaxAmountOfContracts({
     maxAmount,

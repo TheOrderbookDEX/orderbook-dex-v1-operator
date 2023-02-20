@@ -1,6 +1,6 @@
 import { OrderType } from '../state/OrderType';
 import { OperatorAction } from './operator';
-import { decodeErrorData, MAX_UINT32 } from '@frugal-wizard/abi2ts-lib';
+import { decodeErrorData, MAX_UINT32 } from '@frugalwizard/abi2ts-lib';
 import { OperatorV1 } from '../../src/OperatorV1';
 import { describeCancelOrderAction } from '../describe/cancelOrder';
 

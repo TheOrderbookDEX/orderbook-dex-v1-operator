@@ -1,4 +1,4 @@
-import { formatValue, MAX_UINT256 } from '@frugal-wizard/abi2ts-lib';
+import { formatValue, MAX_UINT256 } from '@frugalwizard/abi2ts-lib';
 
 export function describeMaxPrice({
     maxPrice,
